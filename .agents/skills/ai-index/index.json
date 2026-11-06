@@ -1,0 +1,588 @@
+{
+  "schema_version": 1,
+  "rules": {
+    "repository": ".agents/skills/ai-index/repository.md",
+    "structure": ".agents/skills/ai-index/structure.md",
+    "verification": ".agents/skills/ai-index/verification.md"
+  },
+  "modules": [
+    {
+      "id": "core",
+      "summary": "Owns the scene bootstrap, run progression, tower data, map generation, and shared palette.",
+      "document": ".agents/skills/ai-index/core.md",
+      "sources": [
+        "Assets/Scripts/Core",
+        "Assets/Scenes/Main.unity",
+        "ProjectSettings/ProjectSettings.asset",
+        "README.md"
+      ],
+      "dependencies": [
+        {
+          "module": "map",
+          "reason": "GameRoot presents the generated tower through MapScreen."
+        },
+        {
+          "module": "gameplay",
+          "reason": "GameRoot starts combat nodes through GameplayScreen."
+        },
+        {
+          "module": "ui-shared",
+          "reason": "GameRoot loads the UI prefab and attaches runtime screens to its Canvas."
+        }
+      ],
+      "code_targets": [
+        {
+          "id": "game-bootstrap",
+          "file": "Assets/Scripts/Core/GameRoot.cs",
+          "symbol": "GameRoot.Awake",
+          "anchor": "private void Awake()",
+          "summary": "Configures portrait runtime state, camera and physics, loads UI.prefab, and presents the title screen.",
+          "related": [
+            {
+              "module": "core",
+              "target": "create-ui",
+              "reason": "Awake delegates UI root creation to the prefab-loading boundary."
+            }
+          ]
+        },
+        {
+          "id": "portrait-board-camera",
+          "file": "Assets/Scripts/Core/PortraitBoardCameraFitter.cs",
+          "symbol": "PortraitBoardCameraFitter.Apply",
+          "anchor": "public void Apply()",
+          "summary": "Keeps the physical board unscaled and centered by expanding the orthographic viewport only when a narrow portrait aspect needs the board's full width.",
+          "related": [
+            {
+              "module": "ui-shared",
+              "target": "ui-prefab-root",
+              "reason": "The screen-space UI scales independently while the world-space board retains its physics coordinates."
+            }
+          ]
+        },
+        {
+          "id": "create-ui",
+          "file": "Assets/Scripts/Core/GameRoot.cs",
+          "symbol": "GameRoot.CreateUi",
+          "anchor": "private void CreateUi()",
+          "summary": "Loads Resources/Prefabs/UI, instantiates the UI root, resolves its Canvas, and obtains the registered GameplayUI and LevelUI prefabs used by GameplayScreen and MapScreen.",
+          "related": [
+            {
+              "module": "ui-shared",
+              "target": "ui-prefab-root",
+              "reason": "The loaded prefab owns the Canvas, scaler, raycaster, and EventSystem."
+            },
+            {
+              "module": "validation",
+              "target": "physical-shot-flow",
+              "reason": "PlayMode acceptance verifies the instantiated UI hierarchy before gameplay."
+            }
+          ]
+        },
+        {
+          "id": "tower-map-generation",
+          "file": "Assets/Scripts/Core/TowerMapGenerator.cs",
+          "symbol": "TowerMapGenerator.Generate",
+          "anchor": "public static TowerMapData Generate(int? requestedSeed = null)",
+          "summary": "Builds a connected, legal eight-layer tower from randomized route topology and one of three combat-safe node-type templates; every route contains normal, elite, event, and rest opportunities before the Boss.",
+          "related": [
+            {
+              "module": "validation",
+              "target": "tower-map-route-contract",
+              "reason": "EditMode coverage samples one hundred seeds and validates route legality plus node-type availability."
+            }
+          ]
+        },
+        {
+          "id": "gameplay-safe-area",
+          "file": "Assets/Scripts/UI/SafeAreaFitter.cs",
+          "symbol": "SafeAreaFitter.ApplySafeArea",
+          "anchor": "private void ApplySafeArea()",
+          "summary": "Anchors GameplayUI's SafeArea to Screen.safeArea so top HUD and bottom controls avoid notches, cutouts, and gesture navigation insets.",
+          "related": [
+            {
+              "module": "validation",
+              "target": "mobile-layout-contract",
+              "reason": "EditMode coverage locks down the safe-area anchor calculation and supported portrait viewport coverage."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "map",
+      "summary": "Owns the visual tower map, legal node selection, route display, and placeholder node flow.",
+      "document": ".agents/skills/ai-index/map.md",
+      "sources": [
+        "Assets/Scripts/Map"
+      ],
+      "dependencies": [
+        {
+          "module": "core",
+          "reason": "MapScreen consumes generated map data and run progression state."
+        },
+        {
+          "module": "ui-shared",
+          "reason": "The map builds its controls under the shared UI prefab Canvas."
+        }
+      ]
+    },
+    {
+      "id": "gameplay",
+      "summary": "Owns physical board construction, symmetric bumper templates, eight-slot score settlement, launcher routing, marbles, and Godot-style combat presentation.",
+      "document": ".agents/skills/ai-index/gameplay.md",
+      "sources": [
+        "Assets/Scripts/Gameplay",
+        "Assets/Resources/Prefabs"
+      ],
+      "dependencies": [
+        {
+          "module": "core",
+          "reason": "Combat receives the selected map node and reports progression through GameRoot."
+        },
+        {
+          "module": "ui-shared",
+          "reason": "GameplayScreen instantiates GameplayUI and sends it display state while gameplay remains the data owner."
+        }
+      ],
+      "code_targets": [
+        {
+          "id": "board-build",
+          "file": "Assets/Scripts/Gameplay/PinballBoard.cs",
+          "symbol": "PinballBoard.Build",
+          "anchor": "public void Build(LevelConfig config, int? layoutSeed = null)",
+          "summary": "Creates the physical playfield, one of four clearance-safe 4×4 staggered grid templates whose spacing is calculated from physical bounds, and a shuffled eight-slot settlement row while preserving the fixed launch route.",
+          "related": [
+            {
+              "module": "validation",
+              "target": "random-layout-safety",
+              "reason": "The PlayMode test proves different seeds change the layout while preserving count, split pegs, and minimum spacing."
+            },
+            {
+              "module": "validation",
+              "target": "physical-shot-flow",
+              "reason": "The PlayMode test exercises the randomized board with a real Rigidbody2D shot."
+            }
+          ]
+        },
+        {
+          "id": "bumper-layout-settings",
+          "file": "Assets/Scripts/Gameplay/BumperLayoutSettings.cs",
+          "symbol": "BumperLayoutSettings",
+          "anchor": "public sealed class BumperLayoutSettings",
+          "summary": "Provides the default 12 normal/4 split counts and validated staggered-layout spacing, scale, and minimum-clearance settings.",
+          "related": [
+            {
+              "module": "gameplay",
+              "target": "board-build",
+              "reason": "PinballBoard consumes these settings before instantiating any bumper pairs."
+            },
+            {
+              "module": "validation",
+              "target": "random-layout-safety",
+              "reason": "PlayMode coverage verifies both defaults and a smaller valid configuration."
+            }
+          ]
+        },
+        {
+          "id": "fire-shot",
+          "file": "Assets/Scripts/Gameplay/GameplayScreen.cs",
+          "symbol": "GameplayScreen.Fire",
+          "anchor": "private void Fire(float charge)",
+          "summary": "Consumes a player shot, converts the displayed nonlinear charge fraction to a bounded upward impulse, and spawns the selected marble at the fixed launcher.",
+          "related": [
+            {
+              "module": "gameplay",
+              "target": "launch-physics-settings",
+              "reason": "Fire delegates the held-time curve and impulse limits to the shared tuning owner."
+            },
+            {
+              "module": "gameplay",
+              "target": "marble-impulse-configure",
+              "reason": "The spawned marble applies this initial vector exactly once as a Rigidbody2D impulse."
+            }
+          ]
+        },
+        {
+          "id": "launch-physics-settings",
+          "file": "Assets/Scripts/Gameplay/LaunchPhysicsSettings.cs",
+          "symbol": "LaunchPhysicsSettings",
+          "anchor": "public sealed class LaunchPhysicsSettings",
+          "summary": "Owns configurable minimum and maximum charge times, impulse bounds, and the AnimationCurve that maps normalized charge to launch force.",
+          "related": [
+            {
+              "module": "gameplay",
+              "target": "fire-shot",
+              "reason": "Player and enemy launch code use this one tuning contract."
+            }
+          ]
+        },
+        {
+          "id": "marble-impulse-configure",
+          "file": "Assets/Scripts/Gameplay/Marble.cs",
+          "symbol": "Marble.Configure",
+          "anchor": "public void Configure(string kind, Vector2 initialImpulse, bool canSplit)",
+          "summary": "Resets a newly spawned marble's prior motion and applies its initial launch or split-child vector with ForceMode2D.Impulse; later motion is governed by 2D physics.",
+          "related": [
+            {
+              "module": "gameplay",
+              "target": "fire-shot",
+              "reason": "Player launches supply the initial impulse through the board spawn boundary."
+            }
+          ]
+        },
+        {
+          "id": "marble-catalog",
+          "file": "Assets/Scripts/Gameplay/MarbleDefinition.cs",
+          "symbol": "MarbleCatalog",
+          "anchor": "public static class MarbleCatalog",
+          "summary": "Defines the six selectable marble playstyles and their shared physical, collision, split, pierce, bounce, and star-reward parameters.",
+          "related": [
+            {
+              "module": "gameplay",
+              "target": "fire-shot",
+              "reason": "GameplayScreen resolves the selected equipped marble before launching it."
+            }
+          ]
+        },
+        {
+          "id": "finish-launch",
+          "file": "Assets/Scripts/Gameplay/GameplayScreen.cs",
+          "symbol": "GameplayScreen.FinishLaunchAfterDelay",
+          "anchor": "private IEnumerator FinishLaunchAfterDelay()",
+          "summary": "Commits one launch's score, plays the combat attack and enemy advance, then evaluates win, failure, or reload.",
+          "related": [
+            {
+              "module": "gameplay",
+              "target": "combat-attack",
+              "reason": "Launch settlement delegates the visible attack and per-shot enemy advance to CombatDisplay."
+            },
+            {
+              "module": "validation",
+              "target": "physical-shot-flow",
+              "reason": "The PlayMode flow waits for settlement and verifies damage plus surviving-enemy advancement."
+            }
+          ]
+        },
+        {
+          "id": "combat-configure",
+          "file": "Assets/Scripts/Gameplay/CombatDisplay.cs",
+          "symbol": "CombatDisplay.Configure",
+          "anchor": "public void Configure(MapNodeType newLevelType, string title, int maxHealth, Color accent, int shotLimit)",
+          "summary": "Configures the encounter title, enemy identity, health, shot markers, and initial fixed-player/right-enemy lane state."
+        },
+        {
+          "id": "combat-attack",
+          "file": "Assets/Scripts/Gameplay/CombatDisplay.cs",
+          "symbol": "CombatDisplay.PlayAttack",
+          "anchor": "public IEnumerator PlayAttack(int damage, int shotIndex)",
+          "summary": "Animates the player projectile, damage text, enemy hit response, and one discrete surviving-enemy advance based on shot index.",
+          "related": [
+            {
+              "module": "validation",
+              "target": "physical-shot-flow",
+              "reason": "The PlayMode acceptance verifies health synchronization and one-step movement after a real launch."
+            }
+          ]
+        },
+        {
+          "id": "create-scoring-bins",
+          "file": "Assets/Scripts/Gameplay/PinballBoard.cs",
+          "symbol": "PinballBoard.CreateScoringBins",
+          "anchor": "private void CreateScoringBins(System.Random random)",
+          "summary": "Builds eight shuffled landing slots: two x1 fixed slots, one x0 slot, and five random x2-to-x5 slots with seven narrow dividers.",
+          "related": [
+            {
+              "module": "validation",
+              "target": "random-layout-safety",
+              "reason": "The PlayMode test verifies slot counts, labels, dividers, and random ranges."
+            }
+          ]
+        },
+        {
+          "id": "resolve-scoring-zone",
+          "file": "Assets/Scripts/Gameplay/ScoringZone.cs",
+          "symbol": "ScoringZone.ResolveMultiplier",
+          "anchor": "public int ResolveMultiplier()",
+          "summary": "Returns the fixed x0/x1 multiplier or rolls an inclusive random multiplier from the configured x2-to-x5 range when entered.",
+          "related": [
+            {
+              "module": "validation",
+              "target": "random-layout-safety",
+              "reason": "The PlayMode test samples every random zone and verifies its range."
+            }
+          ]
+        },
+        {
+          "id": "settle-marble",
+          "file": "Assets/Scripts/Gameplay/Marble.cs",
+          "symbol": "Marble.Settle",
+          "anchor": "public void Settle(int multiplier)",
+          "summary": "Ends one marble and emits a non-negative resolved multiplier, preserving x0 instead of clamping it to x1.",
+          "related": [
+            {
+              "module": "validation",
+              "target": "random-layout-safety",
+              "reason": "The PlayMode test directly verifies that a x0 settlement remains zero."
+            }
+          ]
+        },
+        {
+          "id": "report-first-bumper-damage",
+          "file": "Assets/Scripts/Gameplay/Marble.cs",
+          "symbol": "Marble.OnCollisionEnter2D",
+          "anchor": "private void OnCollisionEnter2D(Collision2D collision)",
+          "summary": "Keeps bumper physics and split checks active, while emitting one damage event for each unique bumper hit by the marble.",
+          "related": [
+            {
+              "module": "validation",
+              "target": "per-bumper-damage",
+              "reason": "The PlayMode test verifies that repeated contact with one bumper is suppressed while another bumper can still add damage."
+            }
+          ]
+        },
+        {
+          "id": "add-bumper-score",
+          "file": "Assets/Scripts/Gameplay/ScoreManager.cs",
+          "symbol": "ScoreManager.AddBumperScore",
+          "anchor": "public void AddBumperScore(int id, int points)",
+          "summary": "Accumulates accepted bumper damage events for each marble while preserving split-score carryover.",
+          "related": [
+            {
+              "module": "validation",
+              "target": "per-bumper-damage",
+              "reason": "EditMode coverage verifies that multiple effective bumper events increase the launch total."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ui-shared",
+      "summary": "Owns the UI root prefab, isolated gameplay HUD and tower-level prefabs, title/result/input UI, and shared runtime visual factories.",
+      "document": ".agents/skills/ai-index/ui-shared.md",
+      "sources": [
+        "Assets/Scripts/UI",
+        "Assets/Scripts/Shared",
+        "Assets/Resources/Fonts",
+        "Assets/Resources/Prefabs/UI.prefab",
+        "Assets/Prefabs/UI/GameplayUI.prefab",
+        "Assets/Prefabs/UI/LevelUI.prefab",
+        "Assets/UI/Gameplay"
+      ],
+      "dependencies": [],
+      "code_targets": [
+        {
+          "id": "ui-prefab-root",
+          "file": "Assets/Resources/Prefabs/UI.prefab",
+          "symbol": "UI prefab root",
+          "anchor": "m_Name: UI",
+          "summary": "Provides the runtime UI root with GameCanvas, CanvasScaler, GraphicRaycaster, EventSystem, StandaloneInputModule, and the GameplayUI prefab registry.",
+          "related": [
+            {
+              "module": "core",
+              "target": "create-ui",
+              "reason": "GameRoot instantiates this prefab before creating a screen."
+            },
+            {
+              "module": "validation",
+              "target": "build-ui-prefab",
+              "reason": "ProjectBuilder regenerates the prefab from the same component contract."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "validation",
+      "summary": "Owns project validation/build entry points and maintained EditMode and PlayMode acceptance tests.",
+      "document": ".agents/skills/ai-index/validation.md",
+      "sources": [
+        "Assets/Editor",
+        "Assets/Tests",
+        ".github/workflows/deploy-pages.yml",
+        ".gitignore"
+      ],
+      "dependencies": [
+        {
+          "module": "core",
+          "reason": "Tests validate bootstrap, run, and map progression contracts."
+        },
+        {
+          "module": "map",
+          "reason": "PlayMode acceptance traverses the map screen."
+        },
+        {
+          "module": "gameplay",
+          "reason": "PlayMode acceptance verifies physical launch and settlement."
+        },
+        {
+          "module": "ui-shared",
+          "reason": "ProjectBuilder creates UI.prefab and PlayMode acceptance verifies it."
+        }
+      ],
+      "code_targets": [
+        {
+          "id": "mobile-layout-contract",
+          "file": "Assets/Tests/EditMode/CoreTests.cs",
+          "symbol": "CoreTests.PortraitCameraFitsTheFullBoardAtSupportedResolutions",
+          "anchor": "public void PortraitCameraFitsTheFullBoardAtSupportedResolutions(int width, int height)",
+          "summary": "Checks the 750×1334, 780×1688, 1080×2400, and 1440×3200 portrait viewports preserve full board coverage, plus safe-area anchors for notch and gesture insets.",
+          "related": [
+            {
+              "module": "core",
+              "target": "portrait-board-camera",
+              "reason": "The test validates the aspect-aware board viewport calculation."
+            }
+          ]
+        },
+        {
+          "id": "tower-map-route-contract",
+          "file": "Assets/Tests/EditMode/CoreTests.cs",
+          "symbol": "CoreTests.GeneratedMapHasReachableSingleBoss",
+          "anchor": "public void GeneratedMapHasReachableSingleBoss()",
+          "summary": "Generates one hundred seeded tower maps and validates connected paths, Boss placement, layer capacity, and the guaranteed elite/event/rest node availability.",
+          "related": [
+            {
+              "module": "core",
+              "target": "tower-map-generation",
+              "reason": "The test verifies generator topology and node-type route templates."
+            }
+          ]
+        },
+        {
+          "id": "play-mode-start-scene",
+          "file": "Assets/Editor/PlayModeStartupScene.cs",
+          "symbol": "PlayModeStartupScene.ConfigureStartScene",
+          "anchor": "private static void ConfigureStartScene()",
+          "summary": "Configures Main.unity as the editor-only Play Mode start scene so the toolbar Play button never runs an open scratch scene.",
+          "related": [
+            {
+              "module": "core",
+              "target": "game-bootstrap",
+              "reason": "The forced editor start scene contains GameRoot, which owns application bootstrap."
+            }
+          ]
+        },
+        {
+          "id": "physical-shot-flow",
+          "file": "Assets/Tests/PlayMode/GameplayFlowTests.cs",
+          "symbol": "GameplayFlowTests.MainSceneBuildsUiAndPhysicalShotCompletes",
+          "anchor": "public IEnumerator MainSceneBuildsUiAndPhysicalShotCompletes()",
+          "summary": "Loads Main, verifies one GameplayUI prefab instance plus its stable nodes and result-panel callback wiring, then fires a physical marble through a randomized board into one of eight settlement slots and verifies settlement, combat synchronization, and surviving-enemy advancement; zero damage is valid for x0.",
+          "related": [
+            {
+              "module": "gameplay",
+              "target": "board-build",
+              "reason": "The test validates randomized PinballBoard construction and physical launch routing."
+            },
+            {
+              "module": "gameplay",
+              "target": "combat-attack",
+              "reason": "The test validates damage synchronization and discrete enemy approach after settlement."
+            },
+            {
+              "module": "core",
+              "target": "create-ui",
+              "reason": "The test validates UI.prefab instantiation and required components."
+            }
+          ]
+        },
+        {
+          "id": "charge-impulse-speed",
+          "file": "Assets/Tests/PlayMode/GameplayFlowTests.cs",
+          "symbol": "GameplayFlowTests.ChargedImpulseProducesDistinctPhysicalLaunchSpeeds",
+          "anchor": "public IEnumerator ChargedImpulseProducesDistinctPhysicalLaunchSpeeds()",
+          "summary": "Uses real Rigidbody2D marbles to verify the configured low and full charge impulses produce materially different launch speeds.",
+          "related": [
+            {
+              "module": "gameplay",
+              "target": "launch-physics-settings",
+              "reason": "The test validates the nonlinear charge-to-impulse tuning contract."
+            },
+            {
+              "module": "gameplay",
+              "target": "marble-impulse-configure",
+              "reason": "The test verifies actual ForceMode2D impulse application instead of a numeric calculation alone."
+            }
+          ]
+        },
+        {
+          "id": "build-ui-prefab",
+          "file": "Assets/Editor/ProjectBuilder.cs",
+          "symbol": "ProjectBuilder.SaveUiPrefab",
+          "anchor": "private static void SaveUiPrefab()",
+          "summary": "Generates Resources/Prefabs/UI.prefab with the Canvas and EventSystem component contract.",
+          "related": [
+            {
+              "module": "ui-shared",
+              "target": "ui-prefab-root",
+              "reason": "This builder is the maintained producer of the UI prefab asset."
+            }
+          ]
+        },
+        {
+          "id": "webgl-pages-build",
+          "file": "Assets/Editor/WebGlBuild.cs",
+          "symbol": "WebGlBuild.BuildGithubPages",
+          "anchor": "public static void BuildGithubPages()",
+          "summary": "Validates Unity's installed WebGL target, refuses to overwrite a non-empty publish folder, builds Main.unity to Builds/WebGL, and writes the GitHub Pages .nojekyll marker after a successful build.",
+          "related": [
+            {
+              "module": "core",
+              "target": "game-bootstrap",
+              "reason": "The WebGL build exports the same Main scene and GameRoot bootstrap used by the editor game flow."
+            }
+          ]
+        },
+        {
+          "id": "random-layout-safety",
+          "file": "Assets/Tests/PlayMode/GameplayFlowTests.cs",
+          "symbol": "GameplayFlowTests.RandomizedBumperLayoutsAreSeededAndSafe",
+          "anchor": "public IEnumerator RandomizedBumperLayoutsAreSeededAndSafe()",
+          "summary": "Verifies seeded 4×4 staggered bumper templates, 14-to-20 configurable bumper counts, equal grid spacing, half-step offsets, rotational edge coverage, clearance, plus eight score slots, seven dividers, 2/1/5 rule counts, visible labels, x2-to-x5 rolls, and true x0 settlement.",
+          "related": [
+            {
+              "module": "gameplay",
+              "target": "board-build",
+              "reason": "The test locks down randomized board generation."
+            },
+            {
+              "module": "gameplay",
+              "target": "create-scoring-bins",
+              "reason": "The test locks down eight-slot construction and labels."
+            },
+            {
+              "module": "gameplay",
+              "target": "resolve-scoring-zone",
+              "reason": "The test samples random-zone resolution."
+            },
+            {
+              "module": "gameplay",
+              "target": "settle-marble",
+              "reason": "The test proves x0 is not clamped to x1."
+            }
+          ]
+        },
+        {
+          "id": "per-bumper-damage",
+          "file": "Assets/Tests/PlayMode/GameplayFlowTests.cs",
+          "symbol": "GameplayFlowTests.MarbleRaisesOneDamageEventPerBumper",
+          "anchor": "public IEnumerator MarbleRaisesOneDamageEventPerBumper()",
+          "summary": "Uses Physics2D to verify that one marble scores once on a repeated bumper and again after hitting a different bumper.",
+          "related": [
+            {
+              "module": "gameplay",
+              "target": "report-first-bumper-damage",
+              "reason": "The test exercises Marble's per-bumper physics collision gate."
+            },
+            {
+              "module": "gameplay",
+              "target": "add-bumper-score",
+              "reason": "The paired EditMode assertion protects score accumulation across effective collisions."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

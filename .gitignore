@@ -1,25 +1,30 @@
-# Godot 4.2+ specific ignores
-~*.dll
+# Unity generated folders
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/Cache/
 
-# Godot 4+ specific ignores
-.godot/
-.nomedia
+# Build outputs: commit only the browser demo used by GitHub Pages.
+/[Bb]uild/
+/[Bb]uilds/*
+!/Builds/WebGL/
+!/Builds/WebGL/**
 
-# Godot-specific ignores
-.import/
-export.cfg
-export_credentials.cfg
+# IDE and OS files
+/.vs/
+/.vscode/
+/*.csproj
+/*.sln
+/*.user
+/*.pidb
+/*.booproj
+/*.svd
 *.tmp
+*.userprefs
+.DS_Store
+Thumbs.db
 
-# Imported translations (automatically generated from CSV files)
-*.translation
-
-# Mono-specific ignores
-.mono/
-data_*/
-mono_crash.*.json
-
-# Export outputs
-*.exe
-# Uncomment if your project does not version PCK files as runtime dependencies.
-# *.pck
+# Locally downloaded Codex skills and their nested repositories are not game source.
+/Tools/External/
