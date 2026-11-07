@@ -11,6 +11,7 @@ namespace PinballRoguelite.Editor
         private const string GameplayPrefabPath = "Assets/Prefabs/UI/GameplayUI.prefab";
         private const string UiRootPrefabPath = "Assets/Resources/Prefabs/UI.prefab";
         private const string FontAssetPath = "Assets/UI/Gameplay/Fonts/GameplayUIFont.asset";
+        private const string FontSourcePath = "Assets/UI/Gameplay/Fonts/方正粗圆_GBK.ttf";
         private const string ProjectTmpSettingsPath = "Assets/TextMesh Pro/Resources/TMP Settings.asset";
         private const string TemporaryTmpSettingsPath = "Assets/Resources/TMP Settings.asset";
 
@@ -83,12 +84,14 @@ namespace PinballRoguelite.Editor
                 TextAlignmentOptions.Left, new Vector2(0f, 0.75f), new Vector2(1f, 1f));
             var normal = CreateButton("NormalMarbleButton", selectionPanel, font, "普通弹珠", GamePalette.Blue, 30,
                 new Vector2(0f, 0f), new Vector2(0.46f, 0.68f), out var normalText);
-            ApplySprite(normal.image, art.NormalButton, true);
+            ApplySprite(normal.image, art.NormalButton, false);
+            UseNativeButtonSize(normal.image, art.NormalButton, new Vector2(0.20f, 0.34f));
             AddButtonIcon("NormalIconArt", normal.transform, art.NormalButtonIcon, new Vector2(0.40f, 0.56f), new Vector2(0.60f, 0.90f));
             LayoutButtonLabel(normalText, new Vector2(0.06f, 0.07f), new Vector2(0.94f, 0.59f), 20f);
             var split = CreateButton("SplitMarbleButton", selectionPanel, font, "分裂弹珠 ×2", GamePalette.PanelLight, 30,
                 new Vector2(0.50f, 0f), new Vector2(1f, 0.68f), out var splitText);
-            ApplySprite(split.image, art.SplitButton, true);
+            ApplySprite(split.image, art.SplitButton, false);
+            UseNativeButtonSize(split.image, art.SplitButton, new Vector2(0.67f, 0.34f));
             AddButtonIcon("SplitIconArt", split.transform, art.SplitButtonIcon, new Vector2(0.38f, 0.56f), new Vector2(0.62f, 0.90f));
             LayoutButtonLabel(splitText, new Vector2(0.06f, 0.07f), new Vector2(0.94f, 0.59f), 20f);
             var launchPanel = CreateRect("LaunchPanel", bottomHud.rectTransform, new Vector2(0.69f, 0.16f),
@@ -101,7 +104,8 @@ namespace PinballRoguelite.Editor
                 TextAlignmentOptions.Center, Vector2.zero, Vector2.one);
             var launch = CreateButton("LaunchButton", launchPanel, font, "按住蓄力\n松开发射", GamePalette.Green, 27,
                 Vector2.zero, new Vector2(1f, 0.68f), out var launchText);
-            ApplySprite(launch.image, art.LaunchButton, true);
+            ApplySprite(launch.image, art.LaunchButton, false);
+            UseNativeButtonSize(launch.image, art.LaunchButton, new Vector2(0.375f, 0.34f));
             AddButtonIcon("LaunchIconArt", launch.transform, art.LaunchButtonIcon, new Vector2(0.08f, 0.30f), new Vector2(0.34f, 0.76f));
             LayoutButtonLabel(launchText, new Vector2(0.31f, 0.08f), new Vector2(0.96f, 0.92f), 24f);
             var hold = launch.gameObject.AddComponent<LaunchHoldButton>();
@@ -171,11 +175,11 @@ namespace PinballRoguelite.Editor
         private static TMP_FontAsset LoadOrCreateFont()
         {
             EnsureTmpSettings();
-            var existing = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontAssetPath);
-            if (existing != null && AssetDatabase.LoadAllAssetsAtPath(FontAssetPath).Length >= 3) return existing;
-            if (existing != null) AssetDatabase.DeleteAsset(FontAssetPath);
-            var source = AssetDatabase.LoadAssetAtPath<Font>("Assets/Resources/Fonts/NotoSansSC-VF.ttf");
+            var source = AssetDatabase.LoadAssetAtPath<Font>(FontSourcePath);
             if (source == null) throw new System.InvalidOperationException("The gameplay UI source font is missing.");
+            var existing = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontAssetPath);
+            if (existing != null && AssetDatabase.GetAssetPath(existing.sourceFontFile) == FontSourcePath && AssetDatabase.LoadAllAssetsAtPath(FontAssetPath).Length >= 3) return existing;
+            if (existing != null) AssetDatabase.DeleteAsset(FontAssetPath);
             var font = TMP_FontAsset.CreateFontAsset(source);
             font.atlasPopulationMode = AtlasPopulationMode.Dynamic;
             AssetDatabase.CreateAsset(font, FontAssetPath);
@@ -344,6 +348,17 @@ namespace PinballRoguelite.Editor
             image.type = sliced ? Image.Type.Sliced : Image.Type.Simple;
             image.preserveAspect = !sliced;
             image.color = Color.white;
+        }
+
+        private static void UseNativeButtonSize(Image image, Sprite sprite, Vector2 anchor)
+        {
+            if (image == null || sprite == null) return;
+            var rect = image.rectTransform;
+            rect.anchorMin = anchor;
+            rect.anchorMax = anchor;
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = Vector2.zero;
+            image.SetNativeSize();
         }
 
         private static void AddButtonIcon(string name, Transform parent, Sprite sprite, Vector2 anchorMin, Vector2 anchorMax)
