@@ -38,10 +38,13 @@ namespace PinballRoguelite.Editor
             var combat = battleInfo.gameObject.AddComponent<CombatDisplay>();
             var encounterTitle = CreateText("EncounterTitleText", battleInfo.rectTransform, font, "普通关 · 战斗区", 27,
                 GamePalette.Blue, TextAlignmentOptions.Left, new Vector2(0.03f, 0.82f), new Vector2(0.34f, 1f));
+            HideText(encounterTitle);
             var score = CreateText("ScoreText", topHud.rectTransform, font, "积分  0 / 140", 23, Color.white,
                 TextAlignmentOptions.Center, new Vector2(0.33f, 0.82f), new Vector2(0.68f, 1f));
+            HideText(score);
             var remainingShots = CreateText("RemainingShotsText", topHud.rectTransform, font, "剩余发射  5 / 5", 21,
                 GamePalette.Muted, TextAlignmentOptions.Right, new Vector2(0.67f, 0.82f), new Vector2(0.97f, 1f));
+            HideText(remainingShots);
             var previewBack = CreateImage("AttackPreviewBack", battleInfo.rectTransform, GamePalette.Hex("0F2D3C"),
                 new Vector2(0.03f, 0.58f), new Vector2(0.32f, 0.78f));
             ApplySprite(previewBack, art.DamageBack, true);
@@ -55,11 +58,13 @@ namespace PinballRoguelite.Editor
             playerAvatar.rectTransform.sizeDelta = new Vector2(112f, 112f);
             var playerName = CreateText("PlayerNameText", battleInfo.rectTransform, font, "弹珠勇者", 18,
                 GamePalette.Hex("E2E8F0"), TextAlignmentOptions.Center, new Vector2(0.04f, 0f), new Vector2(0.24f, 0.13f));
+            HideText(playerName);
             var enemyAvatar = CreateImage("EnemyAvatarPlaceholder", battleInfo.rectTransform, Color.clear,
                 new Vector2(0.86f, 0.29f), new Vector2(0.86f, 0.29f));
             enemyAvatar.rectTransform.sizeDelta = new Vector2(112f, 112f);
             var enemyName = CreateText("EnemyNameText", battleInfo.rectTransform, font, "洞穴史莱姆", 21, Color.white,
                 TextAlignmentOptions.Left, new Vector2(0.51f, 0.68f), new Vector2(0.73f, 0.80f));
+            HideText(enemyName);
             var enemyHealth = CreateText("EnemyHealthText", battleInfo.rectTransform, font, "140 / 140", 19,
                 GamePalette.Hex("CBD5E1"), TextAlignmentOptions.Right, new Vector2(0.72f, 0.68f), new Vector2(0.95f, 0.80f));
             var healthBack = CreateImage("EnemyHealthBar", battleInfo.rectTransform, GamePalette.Hex("020617"),
@@ -71,11 +76,13 @@ namespace PinballRoguelite.Editor
             healthFill.rectTransform.pivot = new Vector2(0f, 0.5f);
             var progressLine = CreateImage("ProgressLine", battleInfo.rectTransform, GamePalette.Hex("475569"),
                 new Vector2(0.20f, 0.205f), new Vector2(0.92f, 0.22f));
-            CreateText("AttackHintText", battleInfo.rectTransform, font, "每次发射结算为一次攻击", 18, GamePalette.Muted,
+            var attackHint = CreateText("AttackHintText", battleInfo.rectTransform, font, "每次发射结算为一次攻击", 18, GamePalette.Muted,
                 TextAlignmentOptions.Center, new Vector2(0.27f, 0f), new Vector2(0.73f, 0.13f));
+            HideText(attackHint);
 
             var boardHint = CreateText("BoardHintText", safeArea, font, "", 27, Color.white, TextAlignmentOptions.Center,
                 new Vector2(0.04f, 0.765f), new Vector2(0.96f, 0.81f));
+            HideText(boardHint);
             var bottomHud = CreateImage("BottomHUD", safeArea, new Color(0.04f, 0.08f, 0.14f, 0.97f),
                 Vector2.zero, new Vector2(1f, 0.20f));
             var selectionPanel = CreateRect("MarbleSelectionPanel", bottomHud.rectTransform,
@@ -348,6 +355,11 @@ namespace PinballRoguelite.Editor
             image.type = sliced ? Image.Type.Sliced : Image.Type.Simple;
             image.preserveAspect = !sliced;
             image.color = Color.white;
+        }
+
+        private static void HideText(TMP_Text text)
+        {
+            if (text != null) text.enabled = false;
         }
 
         private static void UseNativeButtonSize(Image image, Sprite sprite, Vector2 anchor)

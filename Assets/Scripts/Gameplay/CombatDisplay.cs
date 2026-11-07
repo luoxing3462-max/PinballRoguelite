@@ -122,7 +122,7 @@ namespace PinballRoguelite
         {
             scoreLabel.text = $"积分  {Mathf.Max(0, totalScore)} / {MaxHealth}";
             shotsLabel.text = $"剩余发射  {Mathf.Max(0, remainingShots)} / {totalShots}";
-            pendingLabel.text = $"本次攻击  {Mathf.Max(0, pendingDamage)}";
+            pendingLabel.text = Mathf.Max(0, pendingDamage).ToString();
         }
 
         public void SetHealthFromTotal(int totalDamage)

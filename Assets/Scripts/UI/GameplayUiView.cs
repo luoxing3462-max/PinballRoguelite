@@ -88,7 +88,6 @@ namespace PinballRoguelite
             if (_artTheme == null) _artTheme = GetComponent<BattleArtTheme>();
             _combatDisplay.Initialize(this);
             _resultOverlay.SetActive(false);
-            _effectStatusText = CreateEffectStatusText();
         }
 
         public void BindInput(Action normalSelected, Action splitSelected, Action chargeStarted, Action chargeReleased)
@@ -153,24 +152,6 @@ namespace PinballRoguelite
         public void SetEffectStatus(string value)
         {
             if (_effectStatusText != null) _effectStatusText.text = value;
-        }
-
-        private TMP_Text CreateEffectStatusText()
-        {
-            var status = new GameObject("EffectStatusText", typeof(RectTransform), typeof(TextMeshProUGUI));
-            status.transform.SetParent(transform, false);
-            var text = status.GetComponent<TextMeshProUGUI>();
-            text.font = _scoreText.font;
-            text.fontSize = 18f;
-            text.color = GamePalette.Cyan;
-            text.alignment = TextAlignmentOptions.TopLeft;
-            text.raycastTarget = false;
-            var rect = text.rectTransform;
-            rect.anchorMin = new Vector2(.035f, .72f);
-            rect.anchorMax = new Vector2(.43f, .82f);
-            rect.offsetMin = Vector2.zero;
-            rect.offsetMax = Vector2.zero;
-            return text;
         }
 
         private static void ConfigureMarbleButton(Button button, MarbleDefinition definition)
