@@ -33,6 +33,20 @@ namespace PinballRoguelite
             gameObject.name = splitTrigger ? "SplitBumper" : "Bumper";
         }
 
+        /// <summary>Changes only the renderer sprite; the CircleCollider2D remains untouched.</summary>
+        public void SetVisualSprite(Sprite sprite)
+        {
+            if (sprite == null) return;
+            if (visual == null) visual = GetComponentInChildren<SpriteRenderer>();
+            if (visual == null)
+                visual = SpriteFactory.AddVisual(transform, sprite, Color.white, Vector2.one * (Radius * 2f), 2);
+            visual.sprite = sprite;
+            visual.color = SplitTrigger ? GamePalette.Pink : Color.white;
+            if (sprite.bounds.size.x > 0f && sprite.bounds.size.y > 0f)
+                visual.transform.localScale = new Vector3((Radius * 2f) / sprite.bounds.size.x,
+                    (Radius * 2f) / sprite.bounds.size.y, 1f);
+        }
+
         private void ApplyPhysicsMaterial(bool splitTrigger)
         {
             if (bumperCollider == null) bumperCollider = GetComponent<CircleCollider2D>();

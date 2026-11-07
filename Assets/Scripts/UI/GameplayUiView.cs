@@ -9,6 +9,7 @@ namespace PinballRoguelite
     {
         [Header("Combat bindings")]
         [SerializeField] private CombatDisplay _combatDisplay;
+        [SerializeField] private BattleArtTheme _artTheme;
         [SerializeField] private RectTransform _battleInfo;
         [SerializeField] private RectTransform _playerAvatarPlaceholder;
         [SerializeField] private TMP_Text _playerNameText;
@@ -65,6 +66,7 @@ namespace PinballRoguelite
         private MarbleDefinition _secondMarble;
 
         public CombatDisplay CombatDisplay => _combatDisplay;
+        public BattleArtCatalog ArtCatalog => _artTheme != null ? _artTheme.Catalog : null;
         public RectTransform BattleInfo => _battleInfo;
         public RectTransform PlayerAvatarPlaceholder => _playerAvatarPlaceholder;
         public TMP_Text PlayerNameText => _playerNameText;
@@ -83,6 +85,7 @@ namespace PinballRoguelite
         {
             if (_initialized) return;
             _initialized = true;
+            if (_artTheme == null) _artTheme = GetComponent<BattleArtTheme>();
             _combatDisplay.Initialize(this);
             _resultOverlay.SetActive(false);
             _effectStatusText = CreateEffectStatusText();
@@ -128,8 +131,8 @@ namespace PinballRoguelite
             _normalMarbleButton.interactable = !disabled;
             _splitMarbleButton.interactable = !disabled;
             _launchButton.interactable = !disabled && canLaunch;
-            _normalMarbleButton.image.color = selectedKind == _firstMarble.Id ? _firstMarble.Color : _unselectedColor;
-            _splitMarbleButton.image.color = selectedKind == _secondMarble.Id ? _secondMarble.Color : _unselectedColor;
+            SetMarbleButtonVisual(_normalMarbleButton, selectedKind == _firstMarble.Id, _firstMarble.Color);
+            SetMarbleButtonVisual(_splitMarbleButton, selectedKind == _secondMarble.Id, _secondMarble.Color);
         }
 
         public void ShowHitFeedback(string value)
@@ -172,9 +175,21 @@ namespace PinballRoguelite
 
         private static void ConfigureMarbleButton(Button button, MarbleDefinition definition)
         {
-            button.image.color = definition.Color;
+            if (button.image.sprite == null) button.image.color = definition.Color;
             var label = button.GetComponentInChildren<TMP_Text>(true);
             if (label != null) label.text = definition.DisplayName + "\n" + definition.Description;
+        }
+
+        private void SetMarbleButtonVisual(Button button, bool selected, Color accent)
+        {
+            if (button == null || button.image == null) return;
+            if (button.image.sprite == null)
+            {
+                button.image.color = selected ? accent : _unselectedColor;
+                return;
+            }
+
+            button.image.color = selected ? Color.white : new Color(0.62f, 0.62f, 0.62f, 1f);
         }
 
         public void ShowResult(bool success, bool boss, int currentScore, int target, Action continuePressed,

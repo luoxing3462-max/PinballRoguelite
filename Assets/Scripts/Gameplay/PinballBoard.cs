@@ -46,14 +46,16 @@ namespace PinballRoguelite
         private GameObject marblePrefab;
         private GameObject bumperPrefab;
         private GameObject scoringZonePrefab;
+        private readonly BattleArtCatalog battleArt;
         private SpriteRenderer loadedMarbleVisual;
         private readonly List<Marble> activeMarbles = new List<Marble>();
         private readonly List<Vector2> bumperPositions = new List<Vector2>();
         public ScoringZone StarZone { get; private set; }
 
-        public PinballBoard(BumperLayoutSettings bumperLayoutSettings = null)
+        public PinballBoard(BumperLayoutSettings bumperLayoutSettings = null, BattleArtCatalog visualArt = null)
         {
             layoutSettings = bumperLayoutSettings ?? new BumperLayoutSettings();
+            battleArt = visualArt ?? Resources.Load<BattleArtCatalog>("UI/Battle/BattleArtCatalog");
         }
 
         public void Build(LevelConfig config, int? layoutSeed = null)
@@ -72,7 +74,8 @@ namespace PinballRoguelite
             scoringZonePrefab = Resources.Load<GameObject>("Prefabs/ScoringZone");
 
             PlayfieldBounds = new Bounds(playfieldCenter, playfieldSize);
-            CreateDecoration("BoardBackground", PlayfieldBounds.center, PlayfieldBounds.size, GamePalette.Panel, -20);
+            CreateDecoration("BoardBackground", PlayfieldBounds.center, PlayfieldBounds.size, GamePalette.Panel, -20,
+                battleArt != null ? battleArt.BoardTexture : null);
             CreateDecoration("LaunchChannel", new Vector2(4.27f, -0.35f), new Vector2(0.56f, 8.9f),
                 new Color(0.04f, 0.17f, 0.27f), -18);
 
@@ -336,7 +339,9 @@ namespace PinballRoguelite
                 go.transform.position = position;
                 go.AddComponent<Bumper2D>();
             }
-            go.GetComponent<Bumper2D>().Configure(points, split);
+            var bumper = go.GetComponent<Bumper2D>();
+            bumper.Configure(points, split);
+            if (battleArt != null) bumper.SetVisualSprite(battleArt.NormalPeg);
         }
 
         private void CreatePlayfieldBoundaries(Bounds bounds, PhysicsMaterial2D material)
@@ -409,7 +414,8 @@ namespace PinballRoguelite
                 {
                     zone.ConfigureStar(zoneSize, GamePalette.Yellow);
                     StarZone = zone;
-                    CreateWorldLabel("★", center + new Vector2(0f, -0.15f), 44, Color.white);
+                    if (battleArt != null && battleArt.StarSlot != null) zone.SetVisualSprite(battleArt.StarSlot);
+                    else CreateWorldLabel("★", center + new Vector2(0f, -0.15f), 44, Color.white);
                 }
                 else CreateWorldLabel(zone.DisplayLabel, center + new Vector2(0f, -0.15f), 38, Color.white);
             }
@@ -457,15 +463,16 @@ namespace PinballRoguelite
             var collider = go.AddComponent<BoxCollider2D>();
             collider.size = size;
             if (material != null) collider.sharedMaterial = material;
-            SpriteFactory.AddVisual(go.transform, SpriteFactory.Square, color, size, 1);
+            var sprite = name == "BinDivider" && battleArt != null ? battleArt.SlotDivider : null;
+            AddWorldVisual(go.transform, sprite, color, size, 1);
         }
 
-        private void CreateDecoration(string name, Vector2 position, Vector2 size, Color color, int order)
+        private void CreateDecoration(string name, Vector2 position, Vector2 size, Color color, int order, Sprite sprite = null)
         {
             var go = new GameObject(name);
             go.transform.SetParent(Root);
             go.transform.position = position;
-            SpriteFactory.AddVisual(go.transform, SpriteFactory.Square, color, size, order);
+            AddWorldVisual(go.transform, sprite, color, size, order);
         }
 
         private void CreateLauncherVisual()
@@ -473,12 +480,23 @@ namespace PinballRoguelite
             CreateDecoration("LauncherHousing", LaunchOrigin + new Vector2(0f, -0.45f), new Vector2(0.62f, 1.15f),
                 GamePalette.Hex("0F172A"), 2);
             CreateDecoration("LauncherSpring", LaunchOrigin + new Vector2(0f, -0.37f), new Vector2(0.12f, 0.60f),
-                GamePalette.Green, 3);
+                GamePalette.Green, 3, battleArt != null ? battleArt.LauncherSpring : null);
+            if (battleArt != null && battleArt.LauncherSpringCap != null)
+                CreateDecoration("LauncherSpringCap", LaunchOrigin + new Vector2(0f, -0.65f), new Vector2(0.22f, 0.10f),
+                    Color.white, 3, battleArt.LauncherSpringCap);
             var loaded = new GameObject("LoadedMarble");
             loaded.transform.SetParent(Root);
             loaded.transform.position = LaunchOrigin;
-            loadedMarbleVisual = SpriteFactory.AddVisual(loaded.transform, SpriteFactory.Circle, GamePalette.Cyan,
-                Vector2.one * 0.38f, 4);
+            loadedMarbleVisual = AddWorldVisual(loaded.transform,
+                battleArt != null ? battleArt.LauncherLoadedMarble : null, GamePalette.Cyan, Vector2.one * 0.38f, 4);
+        }
+
+        private static SpriteRenderer AddWorldVisual(Transform parent, Sprite sprite, Color color, Vector2 size, int order)
+        {
+            var visual = SpriteFactory.AddVisual(parent, sprite ?? SpriteFactory.Square, sprite != null ? Color.white : color, size, order);
+            if (sprite != null && sprite.bounds.size.x > 0f && sprite.bounds.size.y > 0f)
+                visual.transform.localScale = new Vector3(size.x / sprite.bounds.size.x, size.y / sprite.bounds.size.y, 1f);
+            return visual;
         }
 
         private void CreateWorldLabel(string value, Vector2 position, int fontSize, Color color)

@@ -78,7 +78,7 @@ namespace PinballRoguelite
             launchSplitPending = false;
             CurrentTurn = CombatTurn.PlayerInput;
             enemyRandom = new System.Random(System.Guid.NewGuid().GetHashCode());
-            Board = new PinballBoard();
+            Board = new PinballBoard(visualArt: uiView.ArtCatalog);
             Board.Build(Config, effects);
             Board.StarZone.StarEntered += OnStarEntered;
             Board.SetLauncherLoaded(true, selectedKind);

@@ -231,6 +231,15 @@ namespace PinballRoguelite
 
         private void BuildPlayerVisual()
         {
+            var art = view.ArtCatalog;
+            if (art != null && art.PlayerCharacter != null)
+            {
+                CreateArtImage("PlayerCharacterArt", playerRoot, art.PlayerCharacter, new Vector2(133f, 127f), Vector2.zero);
+                if (art.PlayerWeapon != null)
+                    CreateArtImage("PlayerWeaponArt", playerRoot, art.PlayerWeapon, new Vector2(128f, 85f), new Vector2(8f, 32f));
+                return;
+            }
+
             CreateCircle("Shadow", playerRoot, new Color(0f, 0f, 0f, 0.35f), new Vector2(72f, 20f), new Vector2(0f, -38f));
             CreateCircle("Body", playerRoot, GamePalette.Hex("0E7490"), new Vector2(62f, 62f), new Vector2(0f, -2f));
             CreateCircle("Head", playerRoot, GamePalette.Hex("F8FAFC"), new Vector2(39f, 39f), new Vector2(0f, 18f));
@@ -246,10 +255,24 @@ namespace PinballRoguelite
 
         private void BuildPlayerHealthBar()
         {
-            var back = CreateFixedImage("PlayerHealthBar", playerRoot, GamePalette.Hex("020617"), new Vector2(92f, 11f),
-                new Vector2(0f, -53f), 0f);
-            playerHealthFill = CreateFixedImage("PlayerHealthFill", back.transform, GamePalette.Cyan, new Vector2(88f, 7f),
-                Vector2.zero, 0f);
+            var art = view.ArtCatalog;
+            var infoPosition = art != null && art.PlayerInfoBack != null ? new Vector2(0f, -108f) : new Vector2(0f, -53f);
+            if (art != null && art.PlayerInfoBack != null)
+            {
+                CreateArtImage("PlayerInfoBackArt", playerRoot, art.PlayerInfoBack, new Vector2(228f, 58f), infoPosition);
+                if (art.PlayerAvatar != null)
+                    CreateArtImage("PlayerAvatarArt", playerRoot, art.PlayerAvatar, new Vector2(77f, 62f), infoPosition + new Vector2(-75f, 0f));
+            }
+
+            var healthSize = art != null && art.PlayerHealthBack != null ? new Vector2(146f, 36f) : new Vector2(92f, 11f);
+            var healthPosition = art != null && art.PlayerHealthBack != null ? infoPosition + new Vector2(40f, 0f) : infoPosition;
+            var back = art != null && art.PlayerHealthBack != null
+                ? CreateArtImage("PlayerHealthBar", playerRoot, art.PlayerHealthBack, healthSize, healthPosition)
+                : CreateFixedImage("PlayerHealthBar", playerRoot, GamePalette.Hex("020617"), healthSize, healthPosition, 0f);
+            var fillSize = art != null && art.PlayerHealthFill != null ? new Vector2(140f, 30f) : new Vector2(88f, 7f);
+            playerHealthFill = art != null && art.PlayerHealthFill != null
+                ? CreateArtImage("PlayerHealthFill", back.transform, art.PlayerHealthFill, fillSize, Vector2.zero)
+                : CreateFixedImage("PlayerHealthFill", back.transform, GamePalette.Cyan, fillSize, Vector2.zero, 0f);
             playerHealthFill.rectTransform.anchorMin = new Vector2(0f, 0.5f);
             playerHealthFill.rectTransform.anchorMax = new Vector2(1f, 0.5f);
             playerHealthFill.rectTransform.pivot = new Vector2(0f, 0.5f);
@@ -262,8 +285,8 @@ namespace PinballRoguelite
             playerHealthLabel.alignment = TextAlignmentOptions.Center;
             playerHealthLabel.rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
             playerHealthLabel.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-            playerHealthLabel.rectTransform.sizeDelta = new Vector2(100f, 20f);
-            playerHealthLabel.rectTransform.anchoredPosition = new Vector2(0f, -70f);
+            playerHealthLabel.rectTransform.sizeDelta = new Vector2(110f, 24f);
+            playerHealthLabel.rectTransform.anchoredPosition = healthPosition;
             playerHealthLabel.raycastTarget = false;
         }
 
@@ -275,6 +298,13 @@ namespace PinballRoguelite
                 var child = enemyRoot.GetChild(index).gameObject;
                 child.SetActive(false);
                 Destroy(child);
+            }
+
+            var art = view.ArtCatalog;
+            if (art != null && art.EnemyCharacter != null)
+            {
+                CreateArtImage("EnemyCharacterArt", enemyRoot, art.EnemyCharacter, new Vector2(160f, 134f), Vector2.zero);
+                return;
             }
 
             CreateCircle("Shadow", enemyRoot, new Color(0f, 0f, 0f, 0.35f), new Vector2(88f, 22f), new Vector2(0f, -40f));
@@ -355,7 +385,7 @@ namespace PinballRoguelite
         {
             healthLabel.text = $"{CurrentHealth} / {MaxHealth}";
             var ratio = MaxHealth > 0 ? (float)CurrentHealth / MaxHealth : 0f;
-            healthFill.color = enemyColor;
+            healthFill.color = healthFill.sprite == null ? enemyColor : Color.white;
             healthFill.rectTransform.anchorMax = new Vector2(0.015f + 0.97f * Mathf.Clamp01(ratio), 0.82f);
         }
 
@@ -385,6 +415,14 @@ namespace PinballRoguelite
             var image = CreateFixedImage(objectName, parent, color, size, position, 0f);
             image.sprite = SpriteFactory.Circle;
             image.preserveAspect = false;
+            return image;
+        }
+
+        private static Image CreateArtImage(string objectName, Transform parent, Sprite sprite, Vector2 size, Vector2 position)
+        {
+            var image = CreateFixedImage(objectName, parent, Color.white, size, position, 0f);
+            image.sprite = sprite;
+            image.preserveAspect = true;
             return image;
         }
 

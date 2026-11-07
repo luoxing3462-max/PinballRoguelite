@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fb0ebc76ae5dd94cbae245cb1ab8afb, type: 3}
+  m_Name: BattleArtCatalog
+  m_EditorClassIdentifier: PinballRoguelite.Runtime::PinballRoguelite.BattleArtCatalog
+  boardTexture: {fileID: 21300000, guid: 19e48e63e92c49041981d2b7cbe0ed30, type: 3}
+  boardFrame: {fileID: 21300000, guid: 13aded65020a56940a7330dbb7beae32, type: 3}
+  playerCharacter: {fileID: 21300000, guid: adf511c03c862084d9c0561db639c57d, type: 3}
+  playerWeapon: {fileID: 21300000, guid: 5acd214e752e8b34e83fc1e1c27a62e4, type: 3}
+  enemyCharacter: {fileID: 21300000, guid: 4a4b2a1f73b3e224b8bfff34336870ed, type: 3}
+  playerInfoBack: {fileID: 21300000, guid: 2bb4c64e0734031449195fe80d3de977, type: 3}
+  playerAvatar: {fileID: 21300000, guid: d14b3ab91112faf4b87fb689e2d2de7f, type: 3}
+  playerHealthBack: {fileID: 21300000, guid: 5fc7bb1c45cc3a24ca8a479c4b712278, type: 3}
+  playerHealthFill: {fileID: 21300000, guid: 9848f35afb439c3449341e7162f0435b, type: 3}
+  enemyInfoBack: {fileID: 21300000, guid: 1e4d58b2b97f4fb4a95d360654732345, type: 3}
+  enemyAvatar: {fileID: 21300000, guid: 6fc9edfc1a1035e4c96ce294a5983170, type: 3}
+  enemyHealthBack: {fileID: 21300000, guid: 82c29c92d692e324689297049924c06f, type: 3}
+  enemyHealthFill: {fileID: 21300000, guid: 49471813e9bfae444b65f1720d46d06a, type: 3}
+  damageBack: {fileID: 21300000, guid: cb0b53db01d0634419024b33e112a2f3, type: 3}
+  damageTitle: {fileID: 21300000, guid: e9ffb4915780f2b41b9d3ab4563a5e60, type: 3}
+  normalPeg: {fileID: 21300000, guid: 3e08cc68246711f45bd6e542d51c60a6, type: 3}
+  slotDivider: {fileID: 21300000, guid: 78a362f83c6b9aa4db7d7499600d6c92, type: 3}
+  starSlot: {fileID: 21300000, guid: 4dc92099e7aa4f14485f41282e601299, type: 3}
+  launcherSpring: {fileID: 21300000, guid: 0ae302a1798a0204dbbc45b0862bfe83, type: 3}
+  launcherSpringCap: {fileID: 21300000, guid: aefcf7e7005d9d74cbf89ab08d260377, type: 3}
+  launcherLoadedMarble: {fileID: 21300000, guid: 79b12b3a13211a34e982aed5db6ea889, type: 3}
+  normalButton: {fileID: 21300000, guid: 0c65fc6dcac167c46a2721c862b49715, type: 3}
+  normalButtonIcon: {fileID: 21300000, guid: 5758f340e8b50484ba5879e4230224f2, type: 3}
+  splitButton: {fileID: 21300000, guid: 2f0b4f2e2c702ca469d2a81a6a6f6f35, type: 3}
+  splitButtonIcon: {fileID: 21300000, guid: 9d515dbac4b80bc4993c625590159d28, type: 3}
+  launchButton: {fileID: 21300000, guid: cca70e8346c951c49b32f2f9beccb998, type: 3}
+  launchButtonIcon: {fileID: 21300000, guid: e0886585e383022469b5fe09dd723281, type: 3}

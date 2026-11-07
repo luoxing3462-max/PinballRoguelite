@@ -85,6 +85,20 @@ namespace PinballRoguelite
             }
         }
 
+        /// <summary>Changes only the renderer sprite; the trigger collider keeps its configured size.</summary>
+        public void SetVisualSprite(Sprite sprite)
+        {
+            if (sprite == null) return;
+            if (visual == null) visual = GetComponentInChildren<SpriteRenderer>();
+            if (visual == null) return;
+            visual.sprite = sprite;
+            visual.color = Color.white;
+            var colliderSize = GetComponent<BoxCollider2D>().size;
+            if (sprite.bounds.size.x > 0f && sprite.bounds.size.y > 0f)
+                visual.transform.localScale = new Vector3(colliderSize.x / sprite.bounds.size.x,
+                    colliderSize.y / sprite.bounds.size.y, 1f);
+        }
+
         private void OnTriggerEnter2D(Collider2D other)
         {
             var marble = other.GetComponent<Marble>();

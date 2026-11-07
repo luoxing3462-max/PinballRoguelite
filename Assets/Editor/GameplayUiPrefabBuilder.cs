@@ -22,9 +22,12 @@ namespace PinballRoguelite.Editor
             EnsureFolder("Assets/UI");
             EnsureFolder("Assets/UI/Gameplay");
             EnsureFolder("Assets/UI/Gameplay/Fonts");
+            var art = BattleArtCatalogBuilder.EnsureCatalog();
             var font = LoadOrCreateFont();
             var root = CreateRect("GameplayUI", null, Vector2.zero, Vector2.one);
             var view = root.gameObject.AddComponent<GameplayUiView>();
+            var artTheme = root.gameObject.AddComponent<BattleArtTheme>();
+            artTheme.Configure(art);
             var safeArea = CreateRect("SafeArea", root, Vector2.zero, Vector2.one);
             safeArea.gameObject.AddComponent<SafeAreaFitter>();
 
@@ -40,8 +43,12 @@ namespace PinballRoguelite.Editor
                 GamePalette.Muted, TextAlignmentOptions.Right, new Vector2(0.67f, 0.82f), new Vector2(0.97f, 1f));
             var previewBack = CreateImage("AttackPreviewBack", battleInfo.rectTransform, GamePalette.Hex("0F2D3C"),
                 new Vector2(0.03f, 0.58f), new Vector2(0.32f, 0.78f));
+            ApplySprite(previewBack, art.DamageBack, true);
+            var damageTitle = CreateImage("DamageTitleArt", previewBack.rectTransform, Color.white,
+                new Vector2(0.04f, 0.15f), new Vector2(0.30f, 0.85f));
+            ApplySprite(damageTitle, art.DamageTitle, false);
             var attackPreview = CreateText("AttackPreviewText", previewBack.rectTransform, font, "本次攻击  0", 22,
-                GamePalette.Cyan, TextAlignmentOptions.Center, Vector2.zero, Vector2.one);
+                GamePalette.Cyan, TextAlignmentOptions.Center, new Vector2(0.27f, 0f), Vector2.one);
             var playerAvatar = CreateImage("PlayerAvatarPlaceholder", battleInfo.rectTransform, Color.clear,
                 new Vector2(0.14f, 0.29f), new Vector2(0.14f, 0.29f));
             playerAvatar.rectTransform.sizeDelta = new Vector2(112f, 112f);
@@ -56,8 +63,10 @@ namespace PinballRoguelite.Editor
                 GamePalette.Hex("CBD5E1"), TextAlignmentOptions.Right, new Vector2(0.72f, 0.68f), new Vector2(0.95f, 0.80f));
             var healthBack = CreateImage("EnemyHealthBar", battleInfo.rectTransform, GamePalette.Hex("020617"),
                 new Vector2(0.51f, 0.57f), new Vector2(0.95f, 0.67f));
+            ApplySprite(healthBack, art.EnemyHealthBack, true);
             var healthFill = CreateImage("EnemyHealthFill", healthBack.rectTransform, GamePalette.Green,
                 new Vector2(0.015f, 0.18f), new Vector2(0.985f, 0.82f));
+            ApplySprite(healthFill, art.EnemyHealthFill, true);
             healthFill.rectTransform.pivot = new Vector2(0f, 0.5f);
             var progressLine = CreateImage("ProgressLine", battleInfo.rectTransform, GamePalette.Hex("475569"),
                 new Vector2(0.20f, 0.205f), new Vector2(0.92f, 0.22f));
@@ -73,9 +82,15 @@ namespace PinballRoguelite.Editor
             CreateText("SelectionTitleText", selectionPanel, font, "本次发射弹珠", 26, Color.white,
                 TextAlignmentOptions.Left, new Vector2(0f, 0.75f), new Vector2(1f, 1f));
             var normal = CreateButton("NormalMarbleButton", selectionPanel, font, "普通弹珠", GamePalette.Blue, 30,
-                new Vector2(0f, 0f), new Vector2(0.46f, 0.68f), out _);
+                new Vector2(0f, 0f), new Vector2(0.46f, 0.68f), out var normalText);
+            ApplySprite(normal.image, art.NormalButton, true);
+            AddButtonIcon("NormalIconArt", normal.transform, art.NormalButtonIcon, new Vector2(0.40f, 0.56f), new Vector2(0.60f, 0.90f));
+            LayoutButtonLabel(normalText, new Vector2(0.06f, 0.07f), new Vector2(0.94f, 0.59f), 20f);
             var split = CreateButton("SplitMarbleButton", selectionPanel, font, "分裂弹珠 ×2", GamePalette.PanelLight, 30,
-                new Vector2(0.50f, 0f), new Vector2(1f, 0.68f), out _);
+                new Vector2(0.50f, 0f), new Vector2(1f, 0.68f), out var splitText);
+            ApplySprite(split.image, art.SplitButton, true);
+            AddButtonIcon("SplitIconArt", split.transform, art.SplitButtonIcon, new Vector2(0.38f, 0.56f), new Vector2(0.62f, 0.90f));
+            LayoutButtonLabel(splitText, new Vector2(0.06f, 0.07f), new Vector2(0.94f, 0.59f), 20f);
             var launchPanel = CreateRect("LaunchPanel", bottomHud.rectTransform, new Vector2(0.69f, 0.16f),
                 new Vector2(0.97f, 0.95f));
             var chargeBack = CreateImage("ChargeBar", launchPanel, GamePalette.Hex("0F172A"), new Vector2(0f, 0.75f),
@@ -86,6 +101,9 @@ namespace PinballRoguelite.Editor
                 TextAlignmentOptions.Center, Vector2.zero, Vector2.one);
             var launch = CreateButton("LaunchButton", launchPanel, font, "按住蓄力\n松开发射", GamePalette.Green, 27,
                 Vector2.zero, new Vector2(1f, 0.68f), out var launchText);
+            ApplySprite(launch.image, art.LaunchButton, true);
+            AddButtonIcon("LaunchIconArt", launch.transform, art.LaunchButtonIcon, new Vector2(0.08f, 0.30f), new Vector2(0.34f, 0.76f));
+            LayoutButtonLabel(launchText, new Vector2(0.31f, 0.08f), new Vector2(0.96f, 0.92f), 24f);
             var hold = launch.gameObject.AddComponent<LaunchHoldButton>();
 
             var feedback = CreateRect("FloatingFeedbackLayer", safeArea, Vector2.zero, Vector2.one);
@@ -121,7 +139,7 @@ namespace PinballRoguelite.Editor
             var restartButton = CreateButton("RestartButton", defeatPanel.transform, font, "重新开始冒险", GamePalette.Hex("475569"), 34,
                 new Vector2(0.17f, 0.05f), new Vector2(0.83f, 0.18f), out var restartText);
 
-            ApplyBindings(view, combat, battleInfo.rectTransform, playerAvatar.rectTransform, playerName, attackPreview,
+            ApplyBindings(view, artTheme, combat, battleInfo.rectTransform, playerAvatar.rectTransform, playerName, attackPreview,
                 enemyAvatar.rectTransform, enemyName, healthFill, enemyHealth, progressLine.rectTransform, encounterTitle,
                 score, remainingShots, boardHint, normal, split, launch, hold, chargeFill, chargeText, launchText,
                 hitFeedback, damageFeedback, settlementFeedback, resultOverlay, victoryPanel, victoryTitle, victoryMessage,
@@ -197,7 +215,7 @@ namespace PinballRoguelite.Editor
             PrefabUtility.UnloadPrefabContents(uiRoot);
         }
 
-        private static void ApplyBindings(GameplayUiView view, CombatDisplay combat, RectTransform battleInfo,
+        private static void ApplyBindings(GameplayUiView view, BattleArtTheme artTheme, CombatDisplay combat, RectTransform battleInfo,
             RectTransform playerAvatar, TMP_Text playerName, TMP_Text attackPreview, RectTransform enemyAvatar,
             TMP_Text enemyName, Image healthFill, TMP_Text enemyHealth, RectTransform progressLine, TMP_Text encounterTitle,
             TMP_Text score, TMP_Text remainingShots, TMP_Text boardHint, Button normal, Button split, Button launch,
@@ -209,6 +227,7 @@ namespace PinballRoguelite.Editor
         {
             var serialized = new SerializedObject(view);
             SetReference(serialized, "_combatDisplay", combat);
+            SetReference(serialized, "_artTheme", artTheme);
             SetReference(serialized, "_battleInfo", battleInfo);
             SetReference(serialized, "_playerAvatarPlaceholder", playerAvatar);
             SetReference(serialized, "_playerNameText", playerName);
@@ -316,6 +335,31 @@ namespace PinballRoguelite.Editor
             labelText.rectTransform.offsetMin = new Vector2(8f, 5f);
             labelText.rectTransform.offsetMax = new Vector2(-8f, -5f);
             return button;
+        }
+
+        private static void ApplySprite(Image image, Sprite sprite, bool sliced)
+        {
+            if (image == null || sprite == null) return;
+            image.sprite = sprite;
+            image.type = sliced ? Image.Type.Sliced : Image.Type.Simple;
+            image.preserveAspect = !sliced;
+            image.color = Color.white;
+        }
+
+        private static void AddButtonIcon(string name, Transform parent, Sprite sprite, Vector2 anchorMin, Vector2 anchorMax)
+        {
+            if (sprite == null) return;
+            var icon = CreateImage(name, parent, Color.white, anchorMin, anchorMax);
+            ApplySprite(icon, sprite, false);
+        }
+
+        private static void LayoutButtonLabel(TMP_Text label, Vector2 anchorMin, Vector2 anchorMax, float fontSize)
+        {
+            label.rectTransform.anchorMin = anchorMin;
+            label.rectTransform.anchorMax = anchorMax;
+            label.rectTransform.offsetMin = Vector2.zero;
+            label.rectTransform.offsetMax = Vector2.zero;
+            label.fontSize = fontSize;
         }
     }
 }
