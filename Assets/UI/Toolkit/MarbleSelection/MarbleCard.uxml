@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Button name="marble-card-button" class="marble-card-button">
+        <ui:VisualElement name="card-art" class="card-art" picking-mode="Ignore" />
+        <ui:VisualElement name="marble-icon" class="marble-icon" picking-mode="Ignore" />
+        <ui:Label name="marble-name" class="marble-name" picking-mode="Ignore" />
+        <ui:Label name="marble-description" class="marble-description" picking-mode="Ignore" />
+        <ui:VisualElement name="selection-check" class="selection-check" picking-mode="Ignore" />
+    </ui:Button>
+</ui:UXML>

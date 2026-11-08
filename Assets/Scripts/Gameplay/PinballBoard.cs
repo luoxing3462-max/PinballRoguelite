@@ -19,9 +19,13 @@ namespace PinballRoguelite
         public const float BumperLayoutTop = 2.70f;
         public const float BumperLayoutBottom = -2.40f;
         private const float BoundaryThickness = 0.12f;
+        // Matches the rounded inner lip of the 670 x 660 BoardBackground artwork.
+        // This is physics-only; BoardFrame remains the sole renderer for the rim.
+        private const float BoardCornerRadius = 0.42f;
         private const float BottomExitHeightRatio = 0.125f;
         private const float LauncherEntranceLowerRatio = 0.80f;
         private const float LauncherEntranceUpperRatio = 0.975f;
+        private const float FigmaBoardBackgroundAspect = 670f / 660f;
         private static readonly Vector2 playfieldCenter = new Vector2(-0.55f, 0.08f);
         private static readonly Vector2 playfieldSize = new Vector2(8.55f, 10.6f);
         public Transform Root { get; private set; }
@@ -63,35 +67,39 @@ namespace PinballRoguelite
             Build(config, null, layoutSeed);
         }
 
-        public void Build(LevelConfig config, RunEffects effects, int? layoutSeed = null)
+        public void Build(LevelConfig config, RunEffects effects, int? layoutSeed = null, Transform physicsParent = null)
         {
             LayoutSeed = layoutSeed ?? System.Guid.NewGuid().GetHashCode();
             bumperPositions.Clear();
             var rootObject = new GameObject("PhysicsWorld");
             Root = rootObject.transform;
+            if (physicsParent != null)
+            {
+                physicsParent.GetComponent<PlayfieldPhysicsHost>()?.PrepareForWorldPhysics();
+                Root.SetParent(physicsParent, true);
+            }
             marblePrefab = Resources.Load<GameObject>("Prefabs/Marble");
             bumperPrefab = Resources.Load<GameObject>("Prefabs/Bumper");
             scoringZonePrefab = Resources.Load<GameObject>("Prefabs/ScoringZone");
 
             PlayfieldBounds = new Bounds(playfieldCenter, playfieldSize);
-            CreateDecoration("BoardBackground", PlayfieldBounds.center, PlayfieldBounds.size, GamePalette.Panel, -20,
+            var boardBackgroundSize = new Vector2(PlayfieldBounds.size.y * FigmaBoardBackgroundAspect, PlayfieldBounds.size.y);
+            CreateDecoration("BoardBackground", PlayfieldBounds.center, boardBackgroundSize, GamePalette.Panel, -20,
                 battleArt != null ? battleArt.BoardTexture : null);
-            CreateDecoration("LaunchChannel", new Vector2(4.27f, -0.35f), new Vector2(0.56f, 8.9f),
-                new Color(0.04f, 0.17f, 0.27f), -18);
 
             var guideMaterial = new PhysicsMaterial2D("GuideMaterial") { bounciness = 0.10f, friction = 0.01f };
             CreatePlayfieldBoundaries(PlayfieldBounds, guideMaterial);
-            CreateWall("ChannelInnerWall", new Vector2(ChannelInnerWallX, -0.35f), new Vector2(0.09f, 8.9f), 0f, guideMaterial, GamePalette.Cyan);
-            CreateWall("ChannelOuterWall", new Vector2(4.55f, -0.35f), new Vector2(0.09f, 8.9f), 0f, guideMaterial, GamePalette.Hex("155E75"));
+            CreateWall("ChannelInnerWall", new Vector2(ChannelInnerWallX, -0.35f), new Vector2(0.09f, 8.9f), 0f, guideMaterial);
+            CreateWall("ChannelOuterWall", new Vector2(4.55f, -0.35f), new Vector2(0.09f, 8.9f), 0f, guideMaterial);
 
             var turnCenter = new Vector2(3.55f, 4.10f);
-            CreateArc("OuterArc", turnCenter, 1.00f, 0.09f, 24, guideMaterial, GamePalette.Hex("155E75"));
+            CreateArc("OuterArc", turnCenter, 1.00f, 0.09f, 24, guideMaterial);
             // A short physical guide inside the visible double-rail curve converts the upward
             // momentum into leftward motion. The marble still travels and collides normally;
             // no position or velocity teleport is used for the launch turn.
             CreateWall("TurnDeflector", new Vector2(4.25f, 4.75f), new Vector2(0.78f, 0.09f), -45f,
-                guideMaterial, GamePalette.Cyan);
-            CreateWall("TopOuterGuide", new Vector2(3.12f, 5.10f), new Vector2(0.86f, 0.09f), 0f, guideMaterial, GamePalette.Hex("155E75"));
+                guideMaterial);
+            CreateWall("TopOuterGuide", new Vector2(3.12f, 5.10f), new Vector2(0.86f, 0.09f), 0f, guideMaterial);
 
             var random = new System.Random(LayoutSeed);
             CreateLauncherVisual();
@@ -352,15 +360,19 @@ namespace PinballRoguelite
             var bottomOpeningTop = Mathf.Lerp(bounds.min.y, bounds.max.y, BottomExitHeightRatio);
             var entranceLower = Mathf.Lerp(bounds.min.y, bounds.max.y, LauncherEntranceLowerRatio);
             var entranceUpper = Mathf.Lerp(bounds.min.y, bounds.max.y, LauncherEntranceUpperRatio);
+            var cornerRadius = Mathf.Min(BoardCornerRadius, (top - bottomOpeningTop) * 0.25f);
+            var roundedLeftTop = top - cornerRadius;
 
-            CreateWall("LeftWall", new Vector2(left, (bottomOpeningTop + top) * 0.5f),
-                new Vector2(BoundaryThickness, top - bottomOpeningTop), 0f, material, GamePalette.Muted);
-            CreateWall("TopWall", new Vector2(bounds.center.x, top),
-                new Vector2(bounds.size.x - BoundaryThickness, BoundaryThickness), 0f, material, GamePalette.Muted);
+            CreateWall("LeftWall", new Vector2(left, (bottomOpeningTop + roundedLeftTop) * 0.5f),
+                new Vector2(BoundaryThickness, roundedLeftTop - bottomOpeningTop), 0f, material);
+            CreateWall("TopWall", new Vector2((left + cornerRadius + right) * 0.5f, top),
+                new Vector2(right - left - cornerRadius, BoundaryThickness), 0f, material);
             CreateWall("RightWall", new Vector2(right, (bottomOpeningTop + entranceLower) * 0.5f),
-                new Vector2(BoundaryThickness, entranceLower - bottomOpeningTop), 0f, material, GamePalette.Cyan);
+                new Vector2(BoundaryThickness, entranceLower - bottomOpeningTop), 0f, material);
             CreateWall("RightWallTop", new Vector2(right, (entranceUpper + top) * 0.5f),
-                new Vector2(BoundaryThickness, top - entranceUpper), 0f, material, GamePalette.Cyan);
+                new Vector2(BoundaryThickness, top - entranceUpper), 0f, material);
+            CreateArcRange("TopLeftCorner", new Vector2(left + cornerRadius, top - cornerRadius), cornerRadius,
+                BoundaryThickness, 5, 90f, 180f, material);
             CreateOneWayEntranceGate(new Vector2(right, (entranceLower + entranceUpper) * 0.5f),
                 new Vector2(BoundaryThickness, entranceUpper - entranceLower), material);
         }
@@ -380,7 +392,6 @@ namespace PinballRoguelite
             effector.useOneWay = true;
             effector.useOneWayGrouping = true;
             effector.surfaceArc = 180f;
-            SpriteFactory.AddVisual(go.transform, SpriteFactory.Square, GamePalette.Cyan, localSize, 1);
         }
 
         private void CreateScoringBins(System.Random random)
@@ -394,7 +405,7 @@ namespace PinballRoguelite
             var binWidth = (right - left) / slotCount;
             for (var i = 1; i < slotCount; i++)
                 CreateWall("BinDivider", new Vector2(left + binWidth * i, binCenterY + 0.07f), new Vector2(0.07f, dividerHeight),
-                    0f, null, GamePalette.Muted);
+                    0f, null);
 
             var rules = new List<float> { 0f, 1f, 1f, 1.25f, 1.25f, 1.5f, 1.5f, 2f };
             Shuffle(rules, random);
@@ -439,22 +450,28 @@ namespace PinballRoguelite
         }
 
         private void CreateArc(string name, Vector2 center, float radius, float thickness, int segments,
-            PhysicsMaterial2D material, Color color)
+            PhysicsMaterial2D material)
+        {
+            CreateArcRange(name, center, radius, thickness, segments, 0f, 90f, material);
+        }
+
+        private void CreateArcRange(string name, Vector2 center, float radius, float thickness, int segments,
+            float startAngle, float endAngle, PhysicsMaterial2D material)
         {
             for (var i = 0; i < segments; i++)
             {
-                var a0 = Mathf.Lerp(0f, 90f, (float)i / segments);
-                var a1 = Mathf.Lerp(0f, 90f, (float)(i + 1) / segments);
+                var a0 = Mathf.Lerp(startAngle, endAngle, (float)i / segments);
+                var a1 = Mathf.Lerp(startAngle, endAngle, (float)(i + 1) / segments);
                 var mid = (a0 + a1) * 0.5f;
                 var radians = mid * Mathf.Deg2Rad;
                 var position = center + new Vector2(Mathf.Cos(radians), Mathf.Sin(radians)) * radius;
                 var length = Mathf.Max(0.09f, radius * (a1 - a0) * Mathf.Deg2Rad * 1.25f);
-                CreateWall(name + i, position, new Vector2(length, thickness), mid + 90f, material, color);
+                CreateWall(name + i, position, new Vector2(length, thickness), mid + 90f, material);
             }
         }
 
         private void CreateWall(string name, Vector2 position, Vector2 size, float rotation,
-            PhysicsMaterial2D material, Color color)
+            PhysicsMaterial2D material)
         {
             var go = new GameObject(name);
             go.transform.SetParent(Root);
@@ -464,7 +481,7 @@ namespace PinballRoguelite
             collider.size = size;
             if (material != null) collider.sharedMaterial = material;
             var sprite = name == "BinDivider" && battleArt != null ? battleArt.SlotDivider : null;
-            AddWorldVisual(go.transform, sprite, color, size, 1);
+            if (sprite != null) AddWorldVisual(go.transform, sprite, Color.white, size, 1);
         }
 
         private void CreateDecoration(string name, Vector2 position, Vector2 size, Color color, int order, Sprite sprite = null)
@@ -477,8 +494,6 @@ namespace PinballRoguelite
 
         private void CreateLauncherVisual()
         {
-            CreateDecoration("LauncherHousing", LaunchOrigin + new Vector2(0f, -0.45f), new Vector2(0.62f, 1.15f),
-                GamePalette.Hex("0F172A"), 2);
             CreateDecoration("LauncherSpring", LaunchOrigin + new Vector2(0f, -0.37f), new Vector2(0.12f, 0.60f),
                 GamePalette.Green, 3, battleArt != null ? battleArt.LauncherSpring : null);
             if (battleArt != null && battleArt.LauncherSpringCap != null)

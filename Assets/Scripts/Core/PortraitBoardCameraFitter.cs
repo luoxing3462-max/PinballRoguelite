@@ -12,10 +12,14 @@ namespace PinballRoguelite
         private Camera targetCamera;
         private int lastWidth;
         private int lastHeight;
+        private Rect viewport = new Rect(0f, 0f, 1f, 1f);
+        private float worldHeightOverride = -1f;
+        private Vector3 defaultPosition;
 
         private void Awake()
         {
             targetCamera = GetComponent<Camera>();
+            defaultPosition = transform.position;
             Apply();
         }
 
@@ -35,9 +39,28 @@ namespace PinballRoguelite
         {
             if (targetCamera == null) targetCamera = GetComponent<Camera>();
             targetCamera.orthographic = true;
-            targetCamera.orthographicSize = CalculateOrthographicSize(Screen.width, Screen.height);
+            targetCamera.rect = viewport;
+            targetCamera.orthographicSize = worldHeightOverride > 0f
+                ? worldHeightOverride * 0.5f
+                : CalculateOrthographicSize(Screen.width, Screen.height);
             lastWidth = Screen.width;
             lastHeight = Screen.height;
+        }
+
+        public void SetPlayfieldViewport(Rect normalizedViewport, float worldHeight, Vector2 worldCenter)
+        {
+            viewport = normalizedViewport;
+            worldHeightOverride = Mathf.Max(0.01f, worldHeight);
+            transform.position = new Vector3(worldCenter.x, worldCenter.y, defaultPosition.z);
+            Apply();
+        }
+
+        public void ResetViewport()
+        {
+            viewport = new Rect(0f, 0f, 1f, 1f);
+            worldHeightOverride = -1f;
+            transform.position = defaultPosition;
+            Apply();
         }
     }
 }

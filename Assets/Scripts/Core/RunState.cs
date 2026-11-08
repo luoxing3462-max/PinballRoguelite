@@ -42,6 +42,12 @@ namespace PinballRoguelite
             return true;
         }
 
+        public bool TryChooseOpeningNode(out MapNodeData node)
+        {
+            node = Map != null && Map.Layers.Count > 0 && Map.Layers[0].Count > 0 ? Map.Layers[0][0] : null;
+            return node != null && node.Type == MapNodeType.Normal && ChooseNode(node);
+        }
+
         public void CompleteActiveNode()
         {
             if (ActiveNode == null)

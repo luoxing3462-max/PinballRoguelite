@@ -10,6 +10,7 @@ namespace PinballRoguelite
         private Canvas canvas;
         private GameplayUiPrefabRegistry gameplayUiPrefabRegistry;
         private LevelUiPrefabRegistry levelUiPrefabRegistry;
+        private MarbleSelectionUiPrefabRegistry marbleSelectionUiPrefabRegistry;
 
         private void Awake()
         {
@@ -51,8 +52,11 @@ namespace PinballRoguelite
             if (gameplayUiPrefabRegistry == null || gameplayUiPrefabRegistry.GameplayUiPrefab == null)
                 throw new MissingReferenceException("UI.prefab must reference GameplayUI.prefab through GameplayUiPrefabRegistry.");
             levelUiPrefabRegistry = uiRoot.GetComponent<LevelUiPrefabRegistry>();
-            if (levelUiPrefabRegistry == null || levelUiPrefabRegistry.LevelUiPrefab == null)
-                throw new MissingReferenceException("UI.prefab must reference LevelUI.prefab through LevelUiPrefabRegistry.");
+            if (levelUiPrefabRegistry == null || levelUiPrefabRegistry.LevelMapUiPrefab == null)
+                throw new MissingReferenceException("UI.prefab must reference LevelMapUI.prefab through LevelUiPrefabRegistry.");
+            marbleSelectionUiPrefabRegistry = uiRoot.GetComponent<MarbleSelectionUiPrefabRegistry>();
+            if (marbleSelectionUiPrefabRegistry == null || marbleSelectionUiPrefabRegistry.MarbleSelectionUiPrefab == null)
+                throw new MissingReferenceException("UI.prefab must reference MarbleSelectionUI.prefab through MarbleSelectionUiPrefabRegistry.");
         }
 
         public void ShowTitle()
@@ -70,18 +74,21 @@ namespace PinballRoguelite
         private void ShowMarbleSelection()
         {
             var screen = ReplaceScreen<MarbleSelectionScreen>("MarbleSelectionScreen");
-            screen.Setup();
+            screen.Setup(marbleSelectionUiPrefabRegistry.MarbleSelectionUiPrefab);
             screen.SelectionConfirmed += marbleIds =>
             {
                 if (!RunState.SetEquippedMarbles(marbleIds)) return;
-                ShowMap();
+                if (RunState.TryChooseOpeningNode(out MapNodeData openingNode))
+                    ShowGameplay(openingNode);
+                else
+                    ShowMap();
             };
         }
 
         public void ShowMap()
         {
             var screen = ReplaceScreen<MapScreen>("MapScreen");
-            screen.Setup(RunState.Map, RunState.AvailableIds, RunState.CompletedIds, levelUiPrefabRegistry.LevelUiPrefab);
+            screen.Setup(RunState.Map, RunState.AvailableIds, RunState.CompletedIds, levelUiPrefabRegistry.LevelMapUiPrefab);
             screen.NodeSelected += OnNodeSelected;
             screen.PlaceholderCompleted += OnPlaceholderCompleted;
         }

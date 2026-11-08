@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1579473781009518952}
   - component: {fileID: 7984171578974944955}
   - component: {fileID: 3202044403306274691}
+  - component: {fileID: 313653152945661354}
   m_Layer: 0
   m_Name: UI
   m_TagString: Untagged
@@ -61,6 +62,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: PinballRoguelite.Runtime::PinballRoguelite.LevelUiPrefabRegistry
   _levelUiPrefab: {fileID: 5732131543757875870, guid: 38c67903146fdd14bb83753a76063ae4, type: 3}
+  _levelMapUiPrefab: {fileID: 7126149456008951433, guid: 6d1f14db9626c514387f230c07c5dd81, type: 3}
+--- !u!114 &313653152945661354
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4159199024731008091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fca4cb58c0ccd514cb869629a2d4bcde, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PinballRoguelite.Runtime::PinballRoguelite.MarbleSelectionUiPrefabRegistry
+  _marbleSelectionUiPrefab: {fileID: 3499753699331210454, guid: 7a3919827713ed0499cd6e8033274f38, type: 3}
 --- !u!1 &6937735781499989661
 GameObject:
   m_ObjectHideFlags: 0
@@ -205,7 +220,7 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 780, y: 1688}
+  m_ReferenceResolution: {x: 750, y: 1334}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3

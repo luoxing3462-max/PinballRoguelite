@@ -6,6 +6,9 @@ namespace PinballRoguelite
     public sealed class BattleArtCatalog : ScriptableObject
     {
         [Header("Backgrounds")]
+        [SerializeField] private Sprite battleBackground;
+        [SerializeField] private Sprite battleGround;
+        [SerializeField] private Sprite bottomBackground;
         [SerializeField] private Sprite boardTexture;
         [SerializeField] private Sprite boardFrame;
 
@@ -41,7 +44,11 @@ namespace PinballRoguelite
         [SerializeField] private Sprite splitButtonIcon;
         [SerializeField] private Sprite launchButton;
         [SerializeField] private Sprite launchButtonIcon;
+        [SerializeField] private Sprite launchButtonDecoration;
 
+        public Sprite BattleBackground => battleBackground;
+        public Sprite BattleGround => battleGround;
+        public Sprite BottomBackground => bottomBackground;
         public Sprite BoardTexture => boardTexture;
         public Sprite BoardFrame => boardFrame;
         public Sprite PlayerCharacter => playerCharacter;
@@ -69,5 +76,6 @@ namespace PinballRoguelite
         public Sprite SplitButtonIcon => splitButtonIcon;
         public Sprite LaunchButton => launchButton;
         public Sprite LaunchButtonIcon => launchButtonIcon;
+        public Sprite LaunchButtonDecoration => launchButtonDecoration;
     }
 }

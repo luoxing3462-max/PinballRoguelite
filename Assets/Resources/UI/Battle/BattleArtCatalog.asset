@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fb0ebc76ae5dd94cbae245cb1ab8afb, type: 3}
   m_Name: BattleArtCatalog
   m_EditorClassIdentifier: PinballRoguelite.Runtime::PinballRoguelite.BattleArtCatalog
+  battleBackground: {fileID: 21300000, guid: 31aead23dd0126143a363c210306bc80, type: 3}
+  battleGround: {fileID: 21300000, guid: ac4ec019fec6d8c4fb9a61984e5fab44, type: 3}
+  bottomBackground: {fileID: 21300000, guid: d21eab4bf0b89434d8ed2705522c54f9, type: 3}
   boardTexture: {fileID: 21300000, guid: 19e48e63e92c49041981d2b7cbe0ed30, type: 3}
   boardFrame: {fileID: 21300000, guid: 13aded65020a56940a7330dbb7beae32, type: 3}
   playerCharacter: {fileID: 21300000, guid: adf511c03c862084d9c0561db639c57d, type: 3}
@@ -39,3 +42,4 @@ MonoBehaviour:
   splitButtonIcon: {fileID: 21300000, guid: 9d515dbac4b80bc4993c625590159d28, type: 3}
   launchButton: {fileID: 21300000, guid: cca70e8346c951c49b32f2f9beccb998, type: 3}
   launchButtonIcon: {fileID: 21300000, guid: e0886585e383022469b5fe09dd723281, type: 3}
+  launchButtonDecoration: {fileID: 21300000, guid: 1717e07f3d4b9d94d9391f2624c34bb1, type: 3}

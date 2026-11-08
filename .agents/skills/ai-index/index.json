@@ -367,7 +367,9 @@
         "Assets/Resources/Prefabs/UI.prefab",
         "Assets/Prefabs/UI/GameplayUI.prefab",
         "Assets/Prefabs/UI/LevelUI.prefab",
-        "Assets/UI/Gameplay"
+        "Assets/Prefabs/UI/MarbleSelectionUI.prefab",
+        "Assets/UI/Gameplay",
+        "Assets/UI/Toolkit"
       ],
       "dependencies": [],
       "code_targets": [

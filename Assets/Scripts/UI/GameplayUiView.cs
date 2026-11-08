@@ -24,6 +24,8 @@ namespace PinballRoguelite
         [SerializeField] private TMP_Text _remainingShotsText;
 
         [Header("Board and launch bindings")]
+        [SerializeField] private RectTransform _playfield;
+        [SerializeField] private PlayfieldPhysicsHost _playfieldPhysicsRoot;
         [SerializeField] private TMP_Text _boardHintText;
         [SerializeField] private Button _normalMarbleButton;
         [SerializeField] private Button _splitMarbleButton;
@@ -80,6 +82,35 @@ namespace PinballRoguelite
         public TMP_Text ScoreText => _scoreText;
         public TMP_Text RemainingShotsText => _remainingShotsText;
         public TMP_Text DamageFeedbackText => _damageFeedbackText;
+        public RectTransform Playfield => _playfield;
+        public Transform PlayfieldPhysicsRoot => _playfieldPhysicsRoot != null ? _playfieldPhysicsRoot.transform : null;
+
+        /// <summary>
+        /// Converts the editable BoardRoot rect into the world camera viewport. The 40/27 pixel
+        /// inset is the frame's art-only rim; board physics continues to use its own world bounds.
+        /// </summary>
+        public Rect GetBoardViewport()
+        {
+            if (_playfield == null || Screen.width <= 0 || Screen.height <= 0)
+                return new Rect(40f / 750f, 1f - 1113f / 1334f, 670f / 750f, 660f / 1334f);
+
+            var canvas = _playfield.GetComponentInParent<Canvas>();
+            var eventCamera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay
+                ? canvas.worldCamera
+                : null;
+            var localRect = _playfield.rect;
+            var scaleX = localRect.width / 724f;
+            var scaleY = localRect.height / 714f;
+            var minimum = new Vector3(localRect.xMin + 40f * scaleX, localRect.yMax - 687f * scaleY, 0f);
+            var maximum = new Vector3(localRect.xMin + 710f * scaleX, localRect.yMax - 27f * scaleY, 0f);
+            var screenMinimum = RectTransformUtility.WorldToScreenPoint(eventCamera, _playfield.TransformPoint(minimum));
+            var screenMaximum = RectTransformUtility.WorldToScreenPoint(eventCamera, _playfield.TransformPoint(maximum));
+            return Rect.MinMaxRect(
+                Mathf.Clamp01(Mathf.Min(screenMinimum.x, screenMaximum.x) / Screen.width),
+                Mathf.Clamp01(Mathf.Min(screenMinimum.y, screenMaximum.y) / Screen.height),
+                Mathf.Clamp01(Mathf.Max(screenMinimum.x, screenMaximum.x) / Screen.width),
+                Mathf.Clamp01(Mathf.Max(screenMinimum.y, screenMaximum.y) / Screen.height));
+        }
 
         public void Initialize()
         {
@@ -158,7 +189,7 @@ namespace PinballRoguelite
         {
             if (button.image.sprite == null) button.image.color = definition.Color;
             var label = button.GetComponentInChildren<TMP_Text>(true);
-            if (label != null) label.text = definition.DisplayName + "\n" + definition.Description;
+            if (label != null) label.text = definition.DisplayName;
         }
 
         private void SetMarbleButtonVisual(Button button, bool selected, Color accent)

@@ -1,0 +1,40 @@
+.marble-card-button {
+    position: absolute;
+    width: 331px;
+    height: 259px;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.marble-card-button.normal { left: 34px; top: 328px; height: 248px; }
+.marble-card-button.split { left: 388px; top: 321px; height: 255px; }
+.marble-card-button.pierce { left: 34px; top: 583px; height: 259px; }
+.marble-card-button.gravity { left: 388px; top: 592px; height: 250px; }
+.marble-card-button.bounce { left: 34px; top: 860px; height: 247px; }
+.marble-card-button.lucky { left: 388px; top: 857px; height: 250px; }
+
+.card-art { position: absolute; left: 0; top: 0; right: 0; bottom: 0; -unity-background-scale-mode: stretch-to-fill; }
+/*
+ * The exported PSD card sprite already contains its marble illustration,
+ * title, and description. Keep these named elements for controller bindings,
+ * but do not render a second set over the authored artwork.
+ */
+.marble-icon, .marble-name, .marble-description { display: none; }
+.selection-check { position: absolute; left: 230px; top: 6px; width: 93px; height: 64px; -unity-background-scale-mode: stretch-to-fill; }
+.selection-check.is-hidden { display: none; }
+.card-art { opacity: 0.88; }
+.is-selected .card-art { opacity: 1; }
+
+.preview-normal .card-art { background-image: url("project://database/Assets/Art/UI/MarbleSelection/Cards/ui_marble_card_normal.png?fileID=21300000&guid=abda5dad4a9755f49a4bdf0a6d76ecf6&type=3#ui_marble_card_normal"); }
+.preview-split .card-art { background-image: url("project://database/Assets/Art/UI/MarbleSelection/Cards/ui_marble_card_split.png?fileID=21300000&guid=f7b8727d52b82564b91b08e08072fc3b&type=3#ui_marble_card_split"); }
+.preview-pierce .card-art { background-image: url("project://database/Assets/Art/UI/MarbleSelection/Cards/ui_marble_card_pierce.png?fileID=21300000&guid=45295ba9da403be4d84014b4292402de&type=3#ui_marble_card_pierce"); }
+.preview-gravity .card-art { background-image: url("project://database/Assets/Art/UI/MarbleSelection/Cards/ui_marble_card_gravity.png?fileID=21300000&guid=c7ee6b470ecff894d9475f6f28db2911&type=3#ui_marble_card_gravity"); }
+.preview-bounce .card-art { background-image: url("project://database/Assets/Art/UI/MarbleSelection/Cards/ui_marble_card_bounce.png?fileID=21300000&guid=405d4f92dae8e474280d05805bfe40d0&type=3#ui_marble_card_bounce"); }
+.preview-lucky .card-art { background-image: url("project://database/Assets/Art/UI/MarbleSelection/Cards/ui_marble_card_lucky.png?fileID=21300000&guid=c1e145c363720d74eb425ecbe619bd80&type=3#ui_marble_card_lucky"); }

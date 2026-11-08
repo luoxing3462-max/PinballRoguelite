@@ -5,6 +5,7 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 /Cache/
+/UIElementsSchema/
 
 # Build outputs: commit only the browser demo used by GitHub Pages.
 /[Bb]uild/

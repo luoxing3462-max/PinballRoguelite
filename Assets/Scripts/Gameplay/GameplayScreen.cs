@@ -79,7 +79,8 @@ namespace PinballRoguelite
             CurrentTurn = CombatTurn.PlayerInput;
             enemyRandom = new System.Random(System.Guid.NewGuid().GetHashCode());
             Board = new PinballBoard(visualArt: uiView.ArtCatalog);
-            Board.Build(Config, effects);
+            Board.Build(Config, effects, physicsParent: uiView.PlayfieldPhysicsRoot);
+            ConfigurePlayfieldCamera();
             Board.StarZone.StarEntered += OnStarEntered;
             Board.SetLauncherLoaded(true, selectedKind);
             Combat.Configure(level.Type, Config.Title, Config.TargetScore, Config.Accent, Config.ShotLimit);
@@ -121,6 +122,13 @@ namespace PinballRoguelite
             }
             if (returnedToLauncher || launchWatchTime >= FailedLaunchTimeout)
                 ResetFailedLaunch();
+        }
+
+        private void LateUpdate()
+        {
+            // PinballBoardArea is user-editable in the GameplayUI prefab. Read, never write,
+            // its RectTransform so physics follows editor layout changes without resetting UI.
+            ConfigurePlayfieldCamera();
         }
 
         private void SelectMarble(string kind)
@@ -407,6 +415,15 @@ namespace PinballRoguelite
         private void OnDestroy()
         {
             Board?.Dispose();
+            var fitter = Camera.main != null ? Camera.main.GetComponent<PortraitBoardCameraFitter>() : null;
+            fitter?.ResetViewport();
+        }
+
+        private void ConfigurePlayfieldCamera()
+        {
+            var fitter = Camera.main != null ? Camera.main.GetComponent<PortraitBoardCameraFitter>() : null;
+            if (fitter != null && Board != null)
+                fitter.SetPlayfieldViewport(uiView.GetBoardViewport(), Board.PlayfieldBounds.size.y, Board.PlayfieldBounds.center);
         }
     }
 }

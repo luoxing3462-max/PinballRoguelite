@@ -15,7 +15,7 @@ namespace PinballRoguelite.Editor
         private const string ProjectTmpSettingsPath = "Assets/TextMesh Pro/Resources/TMP Settings.asset";
         private const string TemporaryTmpSettingsPath = "Assets/Resources/TMP Settings.asset";
 
-        [MenuItem("Pinball Roguelite/UI/Rebuild Gameplay UI Prefab")]
+        [MenuItem("Pinball Roguelite/UI/Rebuild Gameplay UI Prefab (Overwrites Layout)")]
         public static void Rebuild()
         {
             EnsureFolder("Assets/Prefabs");
@@ -32,7 +32,39 @@ namespace PinballRoguelite.Editor
             var safeArea = CreateRect("SafeArea", root, Vector2.zero, Vector2.one);
             safeArea.gameObject.AddComponent<SafeAreaFitter>();
 
-            var topHud = CreateImage("TopHUD", safeArea, new Color(0.04f, 0.08f, 0.14f, 0.96f),
+            // The Figma artwork is kept in independent layers; only its decorative parts
+            // live in Canvas. The board's colliders, pegs, slots and launcher stay world
+            // objects, so no visual layer can accidentally change gameplay physics.
+            var topBackdropMask = CreateRect("TopBackdropMask", safeArea, Vector2.zero, Vector2.one);
+            SetPsdRect(topBackdropMask, 0f, 0f, 750f, 426f);
+            topBackdropMask.gameObject.AddComponent<RectMask2D>();
+            var topBackdrop = CreateImage("BattleBackgroundArt", topBackdropMask, Color.white, Vector2.zero, Vector2.one);
+            ApplySprite(topBackdrop, art.BattleBackground, false);
+            SetPsdRect(topBackdrop.rectTransform, 0f, 0f, 750f, 510f);
+            var groundBackdrop = CreateImage("BattleGroundArt", topBackdropMask, Color.white, Vector2.zero, Vector2.one);
+            ApplySprite(groundBackdrop, art.BattleGround, false);
+            SetPsdRect(groundBackdrop.rectTransform, 0f, 165f, 750f, 250f);
+
+            // The board's live physics is camera-rendered inside the 670 x 660 Figma viewport.
+            // Render the lower backdrop only around that viewport so it decorates the board frame
+            // without drawing over pegs, marbles, launcher visuals, or multiplier slots.
+            var bottomBackgroundSlices = CreateRect("BottomBackgroundSlices", safeArea, Vector2.zero, Vector2.one);
+            CreateMaskedBackgroundSlice("BottomBackgroundTopBand", bottomBackgroundSlices, art.BottomBackground, 0f, 402f, 750f, 51f);
+            CreateMaskedBackgroundSlice("BottomBackgroundLeftBand", bottomBackgroundSlices, art.BottomBackground, 0f, 453f, 40f, 660f);
+            CreateMaskedBackgroundSlice("BottomBackgroundRightBand", bottomBackgroundSlices, art.BottomBackground, 710f, 453f, 40f, 660f);
+            CreateMaskedBackgroundSlice("BottomBackgroundBottomBand", bottomBackgroundSlices, art.BottomBackground, 0f, 1113f, 750f, 221f);
+
+            var playfield = CreateRect("PinballBoardArea", safeArea, Vector2.zero, Vector2.one);
+            SetPsdRect(playfield, 13f, 426f, 724f, 714f);
+            var physicsRoot = new GameObject("PlayfieldPhysicsRoot").transform;
+            physicsRoot.SetParent(playfield, false);
+            physicsRoot.gameObject.AddComponent<PlayfieldPhysicsHost>();
+
+            var boardFrame = CreateImage("BoardFrameArt", playfield, Color.white, Vector2.zero, Vector2.one);
+            ApplySprite(boardFrame, art.BoardFrame, false);
+            SetPsdRect(boardFrame.rectTransform, 0f, 0f, 724f, 714f);
+
+            var topHud = CreateImage("BattleTopArea", safeArea, new Color(0.04f, 0.08f, 0.14f, 0.96f),
                 new Vector2(0.025f, 0.81f), new Vector2(0.975f, 0.99f));
             var battleInfo = CreateImage("BattleInfo", topHud.rectTransform, Color.clear, Vector2.zero, Vector2.one);
             var combat = battleInfo.gameObject.AddComponent<CombatDisplay>();
@@ -83,7 +115,7 @@ namespace PinballRoguelite.Editor
             var boardHint = CreateText("BoardHintText", safeArea, font, "", 27, Color.white, TextAlignmentOptions.Center,
                 new Vector2(0.04f, 0.765f), new Vector2(0.96f, 0.81f));
             HideText(boardHint);
-            var bottomHud = CreateImage("BottomHUD", safeArea, new Color(0.04f, 0.08f, 0.14f, 0.97f),
+            var bottomHud = CreateImage("BottomControlArea", safeArea, new Color(0.04f, 0.08f, 0.14f, 0.97f),
                 Vector2.zero, new Vector2(1f, 0.20f));
             var selectionPanel = CreateRect("MarbleSelectionPanel", bottomHud.rectTransform,
                 new Vector2(0.03f, 0.16f), new Vector2(0.65f, 0.95f));
@@ -114,6 +146,9 @@ namespace PinballRoguelite.Editor
             ApplySprite(launch.image, art.LaunchButton, false);
             UseNativeButtonSize(launch.image, art.LaunchButton, new Vector2(0.375f, 0.34f));
             AddButtonIcon("LaunchIconArt", launch.transform, art.LaunchButtonIcon, new Vector2(0.08f, 0.30f), new Vector2(0.34f, 0.76f));
+            var launchDecoration = AddButtonIcon("LaunchDecorationArt", launch.transform, art.LaunchButtonDecoration,
+                new Vector2(0.37f, 0.20f), new Vector2(0.90f, 0.79f));
+            if (launchDecoration != null) launchDecoration.preserveAspect = true;
             LayoutButtonLabel(launchText, new Vector2(0.31f, 0.08f), new Vector2(0.96f, 0.92f), 24f);
             var hold = launch.gameObject.AddComponent<LaunchHoldButton>();
 
@@ -152,7 +187,7 @@ namespace PinballRoguelite.Editor
 
             ApplyBindings(view, artTheme, combat, battleInfo.rectTransform, playerAvatar.rectTransform, playerName, attackPreview,
                 enemyAvatar.rectTransform, enemyName, healthFill, enemyHealth, progressLine.rectTransform, encounterTitle,
-                score, remainingShots, boardHint, normal, split, launch, hold, chargeFill, chargeText, launchText,
+                score, remainingShots, playfield, physicsRoot.GetComponent<PlayfieldPhysicsHost>(), boardHint, normal, split, launch, hold, chargeFill, chargeText, launchText,
                 hitFeedback, damageFeedback, settlementFeedback, resultOverlay, victoryPanel, victoryTitle, victoryMessage,
                 victoryScore, victoryButton, victoryButtonText, defeatPanel, defeatTitle, defeatMessage, defeatScore,
                 retryButton, retryText, restartButton, restartText);
@@ -213,7 +248,7 @@ namespace PinballRoguelite.Editor
             var scaler = uiRoot.GetComponentInChildren<CanvasScaler>(true);
             if (scaler == null) throw new System.InvalidOperationException("UI.prefab must contain a CanvasScaler.");
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(780f, 1688f);
+            scaler.referenceResolution = new Vector2(750f, 1334f);
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
             scaler.matchWidthOrHeight = 0f;
             var registry = uiRoot.GetComponent<GameplayUiPrefabRegistry>();
@@ -229,7 +264,8 @@ namespace PinballRoguelite.Editor
         private static void ApplyBindings(GameplayUiView view, BattleArtTheme artTheme, CombatDisplay combat, RectTransform battleInfo,
             RectTransform playerAvatar, TMP_Text playerName, TMP_Text attackPreview, RectTransform enemyAvatar,
             TMP_Text enemyName, Image healthFill, TMP_Text enemyHealth, RectTransform progressLine, TMP_Text encounterTitle,
-            TMP_Text score, TMP_Text remainingShots, TMP_Text boardHint, Button normal, Button split, Button launch,
+            TMP_Text score, TMP_Text remainingShots, RectTransform playfield, PlayfieldPhysicsHost physicsRoot,
+            TMP_Text boardHint, Button normal, Button split, Button launch,
             LaunchHoldButton hold, Image chargeFill, TMP_Text chargeText, TMP_Text launchText, TMP_Text hitFeedback,
             TMP_Text damageFeedback, TMP_Text settlementFeedback, GameObject resultOverlay, GameObject victoryPanel,
             TMP_Text victoryTitle, TMP_Text victoryMessage, TMP_Text victoryScore, Button victoryButton,
@@ -251,6 +287,8 @@ namespace PinballRoguelite.Editor
             SetReference(serialized, "_encounterTitleText", encounterTitle);
             SetReference(serialized, "_scoreText", score);
             SetReference(serialized, "_remainingShotsText", remainingShots);
+            SetReference(serialized, "_playfield", playfield);
+            SetReference(serialized, "_playfieldPhysicsRoot", physicsRoot);
             SetReference(serialized, "_boardHintText", boardHint);
             SetReference(serialized, "_normalMarbleButton", normal);
             SetReference(serialized, "_splitMarbleButton", split);
@@ -313,6 +351,25 @@ namespace PinballRoguelite.Editor
             return image;
         }
 
+        private static void SetPsdRect(RectTransform rect, float x, float y, float width, float height)
+        {
+            rect.anchorMin = Vector2.up;
+            rect.anchorMax = Vector2.up;
+            rect.pivot = Vector2.up;
+            rect.sizeDelta = new Vector2(width, height);
+            rect.anchoredPosition = new Vector2(x, -y);
+        }
+
+        private static void CreateMaskedBackgroundSlice(string name, Transform parent, Sprite sprite, float x, float y, float width, float height)
+        {
+            var mask = CreateRect(name, parent, Vector2.zero, Vector2.one);
+            SetPsdRect(mask, x, y, width, height);
+            mask.gameObject.AddComponent<RectMask2D>();
+            var image = CreateImage("BackgroundArt", mask, Color.white, Vector2.zero, Vector2.one);
+            ApplySprite(image, sprite, false);
+            SetPsdRect(image.rectTransform, -x, 402f - y, 750f, 932f);
+        }
+
         private static TMP_Text CreateText(string name, Transform parent, TMP_FontAsset font, string value, float fontSize,
             Color color, TextAlignmentOptions alignment, Vector2 anchorMin, Vector2 anchorMax)
         {
@@ -373,11 +430,12 @@ namespace PinballRoguelite.Editor
             image.SetNativeSize();
         }
 
-        private static void AddButtonIcon(string name, Transform parent, Sprite sprite, Vector2 anchorMin, Vector2 anchorMax)
+        private static Image AddButtonIcon(string name, Transform parent, Sprite sprite, Vector2 anchorMin, Vector2 anchorMax)
         {
-            if (sprite == null) return;
+            if (sprite == null) return null;
             var icon = CreateImage(name, parent, Color.white, anchorMin, anchorMax);
             ApplySprite(icon, sprite, false);
+            return icon;
         }
 
         private static void LayoutButtonLabel(TMP_Text label, Vector2 anchorMin, Vector2 anchorMax, float fontSize)

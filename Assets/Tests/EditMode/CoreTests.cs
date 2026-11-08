@@ -104,6 +104,17 @@ namespace PinballRoguelite.Tests
         }
 
         [Test]
+        public void NewRunCanActivateItsOpeningBattleWithoutOpeningTheMap()
+        {
+            var runState = new RunState();
+            runState.StartNewRun(2206);
+
+            Assert.That(runState.TryChooseOpeningNode(out MapNodeData openingNode), Is.True);
+            Assert.That(openingNode.Type, Is.EqualTo(MapNodeType.Normal));
+            Assert.That(runState.ActiveNode, Is.SameAs(openingNode));
+        }
+
+        [Test]
         public void RunEffectsApplyOncePerAttackAndResetForNewRun()
         {
             var effects = new RunEffects();

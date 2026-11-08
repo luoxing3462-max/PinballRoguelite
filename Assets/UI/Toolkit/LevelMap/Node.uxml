@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="Node.uss" />
+    <ui:VisualElement name="node-root" class="map-node">
+        <ui:Button name="node-button" class="map-node-button" />
+        <ui:Label name="node-type-label" class="map-node-label" />
+    </ui:VisualElement>
+</ui:UXML>

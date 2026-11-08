@@ -1,0 +1,24 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="LevelMap.uss" />
+    <ui:VisualElement name="level-map-root" class="level-map-root">
+        <ui:VisualElement name="safe-area" class="safe-area">
+            <ui:VisualElement name="header" class="header">
+                <ui:Label name="title-label" text="爬塔路线" class="title-label" />
+                <ui:Label name="progress-label" class="progress-label" />
+            </ui:VisualElement>
+            <ui:Label name="instruction-label" text="选择发光节点，路线会向下推进" class="instruction-label" />
+            <ui:VisualElement name="map-panel" class="map-panel">
+                <ui:VisualElement name="map-canvas" class="map-canvas" />
+            </ui:VisualElement>
+            <ui:Label name="type-legend" text="蓝 普通   橙 精英   紫 事件   黄 商店   绿 休息   红 Boss" class="legend-label" />
+            <ui:Label name="state-legend" text="● 可选    ✓ 已完成    ○ 未解锁" class="state-legend" />
+        </ui:VisualElement>
+        <ui:VisualElement name="placeholder-overlay" class="placeholder-overlay is-hidden">
+            <ui:VisualElement name="placeholder-panel" class="placeholder-panel">
+                <ui:Label name="placeholder-title" class="placeholder-title" />
+                <ui:Label name="placeholder-body" class="placeholder-body" />
+                <ui:Button name="placeholder-continue-button" text="继续前进" class="continue-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

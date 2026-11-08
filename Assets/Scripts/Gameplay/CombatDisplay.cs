@@ -8,10 +8,11 @@ namespace PinballRoguelite
 {
     public sealed class CombatDisplay : MonoBehaviour
     {
-        private const float PlayerAnchorX = 0.14f;
-        private const float EnemyStartAnchorX = 0.86f;
+        private const float PlayerAnchorX = 118.5f / 750f;
+        private const float EnemyStartAnchorX = 611.5f / 750f;
         private const float EnemyEndAnchorX = 0.46f;
-        private const float FighterAnchorY = 0.29f;
+        private const float PlayerAnchorY = (425f - 259.5f) / 425f;
+        private const float EnemyAnchorY = (425f - 232f) / 425f;
 
         public int MaxHealth { get; private set; } = 1;
         public int CurrentHealth { get; private set; } = 1;
@@ -21,8 +22,8 @@ namespace PinballRoguelite
         public int PlayerCurrentHealth { get; private set; } = DefaultPlayerMaxHealth;
         public float EnemyProgress { get; private set; }
         public bool IsEnemyAtPlayer => EnemyProgress >= 0.999f;
-        public float PlayerPositionX => playerRoot != null ? playerRoot.anchorMin.x : PlayerAnchorX;
-        public float EnemyPositionX => enemyRoot != null ? enemyRoot.anchorMin.x : EnemyStartAnchorX;
+        public float PlayerPositionX => GetRootNormalizedPosition(playerRoot, new Vector2(PlayerAnchorX, PlayerAnchorY)).x;
+        public float EnemyPositionX => GetRootNormalizedPosition(enemyRoot, new Vector2(EnemyStartAnchorX, EnemyAnchorY)).x;
         public int StepMarkerCount => stepMarkers.Count;
         public bool IsAnimating { get; private set; }
 
@@ -47,6 +48,9 @@ namespace PinballRoguelite
         private MapNodeType levelType;
         private Color enemyColor = GamePalette.Green;
         private int totalShots = 1;
+        private Vector2 playerBasePosition;
+        private Vector2 enemyBasePosition;
+        private float enemyAdvanceDistance;
 
         public void Initialize(GameplayUiView gameplayUiView)
         {
@@ -57,6 +61,9 @@ namespace PinballRoguelite
                 root.gameObject.AddComponent<RectMask2D>();
             playerRoot = view.PlayerAvatarPlaceholder;
             enemyRoot = view.EnemyAvatarPlaceholder;
+            playerBasePosition = playerRoot.anchoredPosition;
+            enemyBasePosition = enemyRoot.anchoredPosition;
+            enemyAdvanceDistance = Mathf.Max(1f, root.rect.width * (EnemyStartAnchorX - EnemyEndAnchorX));
             markerRoot = view.ProgressLine;
             encounterLabel = view.EncounterTitleText;
             scoreLabel = view.ScoreText;
@@ -97,9 +104,9 @@ namespace PinballRoguelite
                     break;
             }
 
+            SetEnemyProgress(0f);
             RebuildEnemyVisual();
             RebuildStepMarkers();
-            SetEnemyProgress(0f);
             SetHealthFromTotal(0);
             ConfigurePlayerHealth(DefaultPlayerMaxHealth);
             SetHudState(0, 0, totalShots);
@@ -138,11 +145,13 @@ namespace PinballRoguelite
 
             var projectile = CreateCircle("AttackProjectile", root, GamePalette.Hex("67E8F9"),
                 new Vector2(22f, 22f), Vector2.zero);
-            SetAnchor(projectile.rectTransform, PlayerAnchorX, FighterAnchorY);
+            var playerPosition = GetRootNormalizedPosition(playerRoot, new Vector2(PlayerAnchorX, PlayerAnchorY));
+            var enemyPosition = GetRootNormalizedPosition(enemyRoot, new Vector2(EnemyStartAnchorX, EnemyAnchorY));
+            SetAnchor(projectile.rectTransform, playerPosition.x, playerPosition.y);
             projectile.transform.SetAsLastSibling();
 
-            var start = new Vector2(PlayerAnchorX, FighterAnchorY);
-            var target = new Vector2(EnemyPositionX, FighterAnchorY);
+            var start = playerPosition;
+            var target = enemyPosition;
             var elapsed = 0f;
             while (elapsed < 0.28f)
             {
@@ -166,12 +175,12 @@ namespace PinballRoguelite
                 var normalized = Mathf.Clamp01(elapsed / 0.36f);
                 var strength = 1f - normalized;
                 SetEnemyTint(Color.Lerp(enemyColor, Color.white, strength * 0.85f));
-                enemyRoot.anchoredPosition = new Vector2(
+                enemyRoot.anchoredPosition = GetEnemyRestingPosition() + new Vector2(
                     Mathf.Sin(strength * Mathf.PI * 6f) * 11f * strength, 0f);
                 yield return null;
             }
             SetEnemyTint(enemyColor);
-            enemyRoot.anchoredPosition = Vector2.zero;
+            enemyRoot.anchoredPosition = GetEnemyRestingPosition();
 
             if (CurrentHealth > 0)
             {
@@ -197,11 +206,13 @@ namespace PinballRoguelite
             IsAnimating = true;
             LastDamage = Mathf.Max(0, damage);
             var projectile = CreateCircle("EnemyAttackProjectile", root, GamePalette.Pink, new Vector2(22f, 22f), Vector2.zero);
-            SetAnchor(projectile.rectTransform, EnemyPositionX, FighterAnchorY);
+            var enemyPosition = GetRootNormalizedPosition(enemyRoot, new Vector2(EnemyStartAnchorX, EnemyAnchorY));
+            var playerPosition = GetRootNormalizedPosition(playerRoot, new Vector2(PlayerAnchorX, PlayerAnchorY));
+            SetAnchor(projectile.rectTransform, enemyPosition.x, enemyPosition.y);
             projectile.transform.SetAsLastSibling();
 
-            var start = new Vector2(EnemyPositionX, FighterAnchorY);
-            var target = new Vector2(PlayerAnchorX, FighterAnchorY);
+            var start = enemyPosition;
+            var target = playerPosition;
             var elapsed = 0f;
             while (elapsed < 0.28f)
             {
@@ -222,10 +233,10 @@ namespace PinballRoguelite
             {
                 elapsed += Time.deltaTime;
                 var strength = 1f - Mathf.Clamp01(elapsed / 0.28f);
-                playerRoot.anchoredPosition = new Vector2(-Mathf.Sin(strength * Mathf.PI * 6f) * 10f * strength, 0f);
+                playerRoot.anchoredPosition = playerBasePosition + new Vector2(-Mathf.Sin(strength * Mathf.PI * 6f) * 10f * strength, 0f);
                 yield return null;
             }
-            playerRoot.anchoredPosition = Vector2.zero;
+            playerRoot.anchoredPosition = playerBasePosition;
             IsAnimating = false;
         }
 
@@ -236,7 +247,7 @@ namespace PinballRoguelite
             {
                 CreateArtImage("PlayerCharacterArt", playerRoot, art.PlayerCharacter, new Vector2(133f, 127f), Vector2.zero);
                 if (art.PlayerWeapon != null)
-                    CreateArtImage("PlayerWeaponArt", playerRoot, art.PlayerWeapon, new Vector2(128f, 85f), new Vector2(8f, 32f));
+                    CreateArtImage("PlayerWeaponArt", playerRoot, art.PlayerWeapon, new Vector2(185f, 123f), new Vector2(25f, 104f));
                 return;
             }
 
@@ -256,16 +267,16 @@ namespace PinballRoguelite
         private void BuildPlayerHealthBar()
         {
             var art = view.ArtCatalog;
-            var infoPosition = art != null && art.PlayerInfoBack != null ? new Vector2(0f, -108f) : new Vector2(0f, -53f);
+            var infoPosition = art != null && art.PlayerInfoBack != null ? new Vector2(9.5f, -133f) : new Vector2(0f, -53f);
             if (art != null && art.PlayerInfoBack != null)
             {
                 CreateArtImage("PlayerInfoBackArt", playerRoot, art.PlayerInfoBack, new Vector2(228f, 58f), infoPosition);
                 if (art.PlayerAvatar != null)
-                    CreateArtImage("PlayerAvatarArt", playerRoot, art.PlayerAvatar, new Vector2(77f, 62f), infoPosition + new Vector2(-75f, 0f));
+                    CreateArtImage("PlayerAvatarArt", playerRoot, art.PlayerAvatar, new Vector2(77f, 62f), infoPosition + new Vector2(-74f, 4f));
             }
 
             var healthSize = art != null && art.PlayerHealthBack != null ? new Vector2(146f, 36f) : new Vector2(92f, 11f);
-            var healthPosition = art != null && art.PlayerHealthBack != null ? infoPosition + new Vector2(40f, 0f) : infoPosition;
+            var healthPosition = art != null && art.PlayerHealthBack != null ? infoPosition + new Vector2(39.5f, 0.5f) : infoPosition;
             var back = art != null && art.PlayerHealthBack != null
                 ? CreateArtImage("PlayerHealthBar", playerRoot, art.PlayerHealthBack, healthSize, healthPosition)
                 : CreateFixedImage("PlayerHealthBar", playerRoot, GamePalette.Hex("020617"), healthSize, healthPosition, 0f);
@@ -303,7 +314,7 @@ namespace PinballRoguelite
             var art = view.ArtCatalog;
             if (art != null && art.EnemyCharacter != null)
             {
-                CreateArtImage("EnemyCharacterArt", enemyRoot, art.EnemyCharacter, new Vector2(160f, 134f), Vector2.zero);
+                CreateArtImage("EnemyCharacterArt", enemyRoot, art.EnemyCharacter, new Vector2(203f, 170f), Vector2.zero);
                 return;
             }
 
@@ -366,8 +377,23 @@ namespace PinballRoguelite
         private void SetEnemyProgress(float value)
         {
             EnemyProgress = Mathf.Clamp01(value);
-            SetAnchor(enemyRoot, Mathf.Lerp(EnemyStartAnchorX, EnemyEndAnchorX, EnemyProgress), FighterAnchorY);
+            enemyRoot.anchoredPosition = GetEnemyRestingPosition();
             UpdateStepMarkers();
+        }
+
+        private Vector2 GetEnemyRestingPosition()
+        {
+            return enemyBasePosition + Vector2.left * enemyAdvanceDistance * EnemyProgress;
+        }
+
+        private Vector2 GetRootNormalizedPosition(RectTransform element, Vector2 fallback)
+        {
+            if (element == null || root == null || root.rect.width <= 0f || root.rect.height <= 0f) return fallback;
+            var localPosition = root.InverseTransformPoint(element.TransformPoint(element.rect.center));
+            var rootRect = root.rect;
+            return new Vector2(
+                Mathf.InverseLerp(rootRect.xMin, rootRect.xMax, localPosition.x),
+                Mathf.InverseLerp(rootRect.yMin, rootRect.yMax, localPosition.y));
         }
 
         private void UpdateStepMarkers()

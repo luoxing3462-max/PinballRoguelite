@@ -13,6 +13,7 @@ namespace PinballRoguelite
         private readonly Dictionary<string, Button> buttons = new Dictionary<string, Button>();
         private Button confirmButton;
         private Text selectionText;
+        private MarbleSelectionUIController toolkitView;
 
         public void Setup()
         {
@@ -37,6 +38,15 @@ namespace PinballRoguelite
             Refresh();
         }
 
+        public void Setup(MarbleSelectionUIController prefab)
+        {
+            if (prefab == null) throw new MissingReferenceException("MarbleSelectionUI.prefab is not assigned.");
+            toolkitView = Instantiate(prefab, transform);
+            toolkitView.name = "MarbleSelectionUI";
+            toolkitView.Initialize(MarbleCatalog.All, Toggle, Confirm);
+            Refresh();
+        }
+
         private void Toggle(string id)
         {
             if (selectedIds.Contains(id)) selectedIds.Remove(id);
@@ -46,6 +56,12 @@ namespace PinballRoguelite
 
         private void Refresh()
         {
+            if (toolkitView != null)
+            {
+                toolkitView.Refresh(selectedIds);
+                return;
+            }
+
             selectionText.text = $"请选择 2 种弹珠（{selectedIds.Count} / 2）";
             foreach (var pair in buttons)
             {

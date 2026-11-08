@@ -38,6 +38,9 @@ namespace PinballRoguelite.Editor
             }
 
             var serialized = new SerializedObject(catalog);
+            SetSprite(serialized, "battleBackground", "Assets/Art/UI/Battle/Backgrounds/ui_battle_background_top.png");
+            SetSprite(serialized, "battleGround", "Assets/Art/UI/Battle/Backgrounds/ui_battle_background_road.png");
+            SetSprite(serialized, "bottomBackground", "Assets/Art/UI/Battle/Backgrounds/ui_battle_background_bottom.png");
             SetSprite(serialized, "boardTexture", "Assets/Art/UI/Battle/Board/ui_battle_board_texture.png");
             SetSprite(serialized, "boardFrame", "Assets/Art/UI/Battle/Board/ui_battle_board_frame.png");
             SetSprite(serialized, "playerCharacter", "Assets/Art/UI/Battle/Characters/ui_battle_character_player.png");
@@ -65,6 +68,7 @@ namespace PinballRoguelite.Editor
             SetSprite(serialized, "splitButtonIcon", "Assets/Art/UI/Battle/Controls/ui_battle_icon_split.png");
             SetSprite(serialized, "launchButton", "Assets/Art/UI/Battle/Controls/ui_battle_button_launch.png");
             SetSprite(serialized, "launchButtonIcon", "Assets/Art/UI/Battle/Controls/ui_battle_icon_launch.png");
+            SetSprite(serialized, "launchButtonDecoration", "Assets/Art/UI/Battle/Controls/ui_battle_button_launch_baked_label_reference.png");
             serialized.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(catalog);
             return catalog;
@@ -79,13 +83,31 @@ namespace PinballRoguelite.Editor
                 importer.textureType = TextureImporterType.Sprite;
                 importer.spriteImportMode = SpriteImportMode.Single;
                 importer.spritePixelsPerUnit = 100f;
+                importer.maxTextureSize = 2048;
+                importer.textureCompression = TextureImporterCompression.Uncompressed;
+                importer.compressionQuality = 100;
+                importer.crunchedCompression = false;
                 importer.alphaIsTransparency = true;
                 importer.mipmapEnabled = false;
                 importer.wrapMode = TextureWrapMode.Clamp;
                 importer.filterMode = FilterMode.Bilinear;
                 importer.spriteBorder = GetBorder(assetPath);
+                ConfigurePlatform(importer, "Standalone");
+                ConfigurePlatform(importer, "WebGL");
                 importer.SaveAndReimport();
             }
+        }
+
+        private static void ConfigurePlatform(TextureImporter importer, string platformName)
+        {
+            var settings = importer.GetPlatformTextureSettings(platformName);
+            settings.name = platformName;
+            settings.overridden = true;
+            settings.maxTextureSize = 2048;
+            settings.textureCompression = TextureImporterCompression.Uncompressed;
+            settings.compressionQuality = 100;
+            settings.crunchedCompression = false;
+            importer.SetPlatformTextureSettings(settings);
         }
 
         private static Vector4 GetBorder(string path)

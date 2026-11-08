@@ -1,0 +1,199 @@
+.level-map-root {
+    flex-grow: 1;
+    background-color: rgb(7, 16, 32);
+    color: rgb(241, 245, 249);
+    /* Shared UI Toolkit font: Assets/UI/Gameplay/Fonts/方正粗圆_GBK.ttf */
+    -unity-font-definition: url("project://database/Assets/UI/Gameplay/Fonts/%E6%96%B9%E6%AD%A3%E7%B2%97%E5%9C%86_GBK.ttf?fileID=12800000&guid=80bfaea041b4e4f479ccada26d5be8c6&type=3#%E6%96%B9%E6%AD%A3%E7%B2%97%E5%9C%86_GBK");
+}
+
+.safe-area {
+    flex-grow: 1;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-top: 28px;
+    padding-bottom: 20px;
+}
+
+.header {
+    height: 114px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(10, 23, 43, 0.96);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+    padding-left: 28px;
+    padding-right: 28px;
+}
+
+.title-label {
+    font-size: 48px;
+    -unity-font-style: bold;
+    color: rgb(248, 250, 252);
+}
+
+.progress-label {
+    font-size: 23px;
+    color: rgb(148, 163, 184);
+    unity-text-align: middle-right;
+}
+
+.instruction-label {
+    height: 72px;
+    font-size: 26px;
+    color: rgb(34, 211, 238);
+    unity-text-align: middle-center;
+}
+
+.map-panel {
+    flex-grow: 1;
+    min-height: 780px;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-top: 22px;
+    padding-bottom: 22px;
+    background-color: rgb(12, 29, 51);
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+}
+
+.map-canvas {
+    flex-grow: 1;
+    position: relative;
+}
+
+.map-connection {
+    position: absolute;
+    height: 7px;
+    background-color: rgb(51, 65, 85);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    transform-origin: 0% 50%;
+}
+
+.map-connection.is-completed {
+    background-color: rgb(34, 211, 238);
+}
+
+.map-node {
+    position: absolute;
+    width: 100px;
+    height: 132px;
+    align-items: center;
+}
+
+.map-node-button {
+    width: 88px;
+    height: 88px;
+    border-top-left-radius: 44px;
+    border-top-right-radius: 44px;
+    border-bottom-left-radius: 44px;
+    border-bottom-right-radius: 44px;
+    border-left-width: 4px;
+    border-right-width: 4px;
+    border-top-width: 4px;
+    border-bottom-width: 4px;
+    border-left-color: rgb(226, 232, 240);
+    border-right-color: rgb(226, 232, 240);
+    border-top-color: rgb(226, 232, 240);
+    border-bottom-color: rgb(226, 232, 240);
+    color: rgb(255, 255, 255);
+    font-size: 34px;
+    -unity-font-style: bold;
+    unity-text-align: middle-center;
+}
+
+.map-node-button:disabled {
+    opacity: 0.46;
+}
+
+.map-node-label {
+    margin-top: 4px;
+    color: rgb(226, 232, 240);
+    font-size: 18px;
+    unity-text-align: middle-center;
+}
+
+.map-node.boss .map-node-button {
+    width: 108px;
+    height: 108px;
+    border-top-left-radius: 54px;
+    border-top-right-radius: 54px;
+    border-bottom-left-radius: 54px;
+    border-bottom-right-radius: 54px;
+    font-size: 40px;
+}
+
+.legend-label, .state-legend {
+    height: 42px;
+    font-size: 21px;
+    color: rgb(148, 163, 184);
+    unity-text-align: middle-center;
+}
+
+.state-legend {
+    color: rgb(100, 116, 139);
+}
+
+.placeholder-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(1, 5, 15, 0.90);
+}
+
+.placeholder-overlay.is-hidden {
+    display: none;
+}
+
+.placeholder-panel {
+    width: 72%;
+    min-height: 360px;
+    padding-left: 42px;
+    padding-right: 42px;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgb(30, 41, 59);
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
+}
+
+.placeholder-title {
+    font-size: 44px;
+    -unity-font-style: bold;
+    unity-text-align: middle-center;
+}
+
+.placeholder-body {
+    font-size: 27px;
+    color: rgb(248, 250, 252);
+    white-space: normal;
+    unity-text-align: middle-center;
+}
+
+.continue-button {
+    width: 62%;
+    height: 78px;
+    background-color: rgb(14, 165, 233);
+    color: rgb(255, 255, 255);
+    font-size: 30px;
+    -unity-font-style: bold;
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
+}

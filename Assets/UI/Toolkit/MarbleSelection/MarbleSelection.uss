@@ -1,0 +1,78 @@
+.marble-selection-root {
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(239, 244, 255);
+    /* Shared UI Toolkit font: Assets/UI/Gameplay/Fonts/方正粗圆_GBK.ttf */
+    -unity-font-definition: url("project://database/Assets/UI/Gameplay/Fonts/%E6%96%B9%E6%AD%A3%E7%B2%97%E5%9C%86_GBK.ttf?fileID=12800000&guid=80bfaea041b4e4f479ccada26d5be8c6&type=3#%E6%96%B9%E6%AD%A3%E7%B2%97%E5%9C%86_GBK");
+}
+
+.marble-selection-artboard {
+    width: 750px;
+    height: 1334px;
+    position: relative;
+    flex-grow: 0;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.background-art, .title-art, .instruction-panel-art, .footer-art {
+    position: absolute;
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.background-art { left: 0; top: 0; width: 750px; height: 1334px; }
+.title-art { left: 42px; top: 22px; width: 666px; height: 222px; }
+.instruction-panel-art { left: 57px; top: 235px; width: 637px; height: 87px; }
+.footer-art { left: 123px; top: 1281px; width: 504px; height: 27px; }
+
+.selection-count {
+    position: absolute;
+    left: 180px;
+    top: 259px;
+    width: 405px;
+    height: 41px;
+    color: rgb(255, 255, 255);
+    font-size: 28px;
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    -unity-font-definition: url("project://database/Assets/UI/Gameplay/Fonts/%E6%96%B9%E6%AD%A3%E7%B2%97%E5%9C%86_GBK.ttf?fileID=12800000&guid=80bfaea041b4e4f479ccada26d5be8c6&type=3#%E6%96%B9%E6%AD%A3%E7%B2%97%E5%9C%86_GBK");
+}
+
+.marble-card-container { position: absolute; left: 0; top: 0; width: 750px; height: 1334px; }
+
+.confirm-button {
+    position: absolute;
+    left: 193px;
+    top: 1122px;
+    width: 364px;
+    height: 134px;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.confirm-button-text {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    color: white;
+    font-size: 38px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    -unity-font-definition: url("project://database/Assets/UI/Gameplay/Fonts/%E6%96%B9%E6%AD%A3%E7%B2%97%E5%9C%86_GBK.ttf?fileID=12800000&guid=80bfaea041b4e4f479ccada26d5be8c6&type=3#%E6%96%B9%E6%AD%A3%E7%B2%97%E5%9C%86_GBK");
+}
+
+/* The top white glyph masks the inner half of the 4px stroke below it,
+   leaving a visually external 2px dark-brown outline. */
+.confirm-outline-text {
+    -unity-text-outline-width: 4px;
+    -unity-text-outline-color: rgb(75, 42, 8);
+}
+
+.confirm-button:disabled { opacity: 0.52; }

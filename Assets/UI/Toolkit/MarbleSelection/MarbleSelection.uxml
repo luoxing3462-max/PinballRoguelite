@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Template name="MarbleCard" src="project://database/Assets/UI/Toolkit/MarbleSelection/MarbleCard.uxml?fileID=9197481963319205126&amp;guid=c4465838dc0106b419060731035b2017&amp;type=3#MarbleCard"/>
+    <Style src="project://database/Assets/UI/Toolkit/MarbleSelection/MarbleSelection.uss?fileID=7433441132597879392&amp;guid=fe1bb35c9e383414085d0f5faa1381f9&amp;type=3#MarbleSelection"/>
+    <Style src="project://database/Assets/UI/Toolkit/MarbleSelection/MarbleCard.uss?fileID=7433441132597879392&amp;guid=9d40b4473cacfaf469c4d039700ecf83&amp;type=3#MarbleCard"/>
+    <ui:VisualElement name="marble-selection-root" class="marble-selection-root">
+        <ui:VisualElement name="marble-selection-artboard" class="marble-selection-artboard">
+            <ui:VisualElement name="background-art" picking-mode="Ignore" class="background-art" style="background-image: url(&quot;project://database/Assets/Art/UI/MarbleSelection/Backgrounds/ui_marble_selection_background.png?fileID=21300000&amp;guid=c708f52ea6db0c146a1a4b899527658a&amp;type=3#ui_marble_selection_background&quot;);"/>
+            <ui:VisualElement name="title-art" picking-mode="Ignore" class="title-art" style="background-image: url(&quot;project://database/Assets/Art/UI/MarbleSelection/Decorations/ui_marble_selection_title.png?fileID=21300000&amp;guid=9857e328736c99747b1a6b644c9f6cb4&amp;type=3#ui_marble_selection_title&quot;);"/>
+            <ui:VisualElement name="instruction-panel-art" picking-mode="Ignore" class="instruction-panel-art" style="background-image: url(&quot;project://database/Assets/Art/UI/MarbleSelection/Decorations/ui_marble_selection_instruction_panel.png?fileID=21300000&amp;guid=4601c65d92ce54c47b1ab35a18c258f4&amp;type=3#ui_marble_selection_instruction_panel&quot;);"/>
+            <ui:Label name="selection-count" text="请选择 2 种弹珠（0 / 2）" picking-mode="Ignore" class="selection-count"/>
+            <ui:VisualElement name="marble-card-container" class="marble-card-container">
+                <ui:Instance template="MarbleCard" name="preview-normal" class="preview-card preview-normal"/>
+                <ui:Instance template="MarbleCard" name="preview-split" class="preview-card preview-split"/>
+                <ui:Instance template="MarbleCard" name="preview-pierce" class="preview-card preview-pierce"/>
+                <ui:Instance template="MarbleCard" name="preview-gravity" class="preview-card preview-gravity"/>
+                <ui:Instance template="MarbleCard" name="preview-bounce" class="preview-card preview-bounce"/>
+                <ui:Instance template="MarbleCard" name="preview-lucky" class="preview-card preview-lucky"/>
+            </ui:VisualElement>
+            <ui:Button name="confirm-button" class="confirm-button" style="background-image: url(&quot;project://database/Assets/Art/UI/MarbleSelection/Buttons/ui_marble_button_confirm.png?fileID=21300000&amp;guid=02f4c3421c5a8b5408df864023a13b25&amp;type=3#ui_marble_button_confirm&quot;);">
+                <ui:Label name="confirm-outline-text" text="确认出战" picking-mode="Ignore" class="confirm-button-text confirm-outline-text" style="-unity-text-outline-width: 8px; font-size: 46px; -unity-text-outline-color: rgb(43, 11, 6); -unity-font-style: normal;"/>
+                <ui:Label name="confirm-label-text" text="确认出战" picking-mode="Ignore" class="confirm-button-text confirm-label-text" style="font-size: 46px; -unity-font-style: normal;"/>
+            </ui:Button>
+            <ui:VisualElement name="footer-art" picking-mode="Ignore" class="footer-art" style="background-image: url(&quot;project://database/Assets/Art/UI/MarbleSelection/Decorations/ui_marble_selection_footer.png?fileID=21300000&amp;guid=1273c9e601b4b864aa7fd8f0d5264886&amp;type=3#ui_marble_selection_footer&quot;);"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace PinballRoguelite
 {
@@ -10,76 +9,25 @@ namespace PinballRoguelite
         public event Action<MapNodeData> NodeSelected;
         public event Action PlaceholderCompleted;
 
-        private LevelUiView uiView;
+        private LevelMapUIController uiView;
         private TowerMapData mapData;
         private HashSet<string> available;
         private HashSet<string> completed;
 
         private void OnDestroy()
         {
-            if (uiView != null) uiView.ContinuePressed -= OnPlaceholderContinue;
+            if (uiView != null) uiView.Release();
         }
 
-        public void Setup(TowerMapData data, HashSet<string> availableIds, HashSet<string> completedIds, LevelUiView levelUiPrefab)
+        public void Setup(TowerMapData data, HashSet<string> availableIds, HashSet<string> completedIds, LevelMapUIController levelUiPrefab)
         {
-            if (levelUiPrefab == null) throw new MissingReferenceException("LevelUI prefab is required.");
+            if (levelUiPrefab == null) throw new MissingReferenceException("LevelMapUI prefab is required.");
             uiView = Instantiate(levelUiPrefab, transform);
-            uiView.name = "LevelUI";
-            uiView.Initialize();
-            uiView.ContinuePressed += OnPlaceholderContinue;
+            uiView.name = "LevelMapUI";
             mapData = data;
             available = new HashSet<string>(availableIds);
             completed = new HashSet<string>(completedIds);
-            RenderMap();
-        }
-
-        private void RenderMap()
-        {
-            uiView.ClearMap();
-            Canvas.ForceUpdateCanvases();
-
-            var rect = uiView.MapArea.rect;
-            var width = rect.width;
-            var height = rect.height;
-            var positions = new Dictionary<string, Vector2>();
-            const float margin = 78f;
-
-            for (var layerIndex = 0; layerIndex < mapData.Layers.Count; layerIndex++)
-            {
-                var layer = mapData.Layers[layerIndex];
-                var y = height * 0.5f - margin - (height - margin * 2f) * layerIndex /
-                    Mathf.Max(1, mapData.Layers.Count - 1);
-                for (var nodeIndex = 0; nodeIndex < layer.Count; nodeIndex++)
-                {
-                    var x = -width * 0.5f + width * (nodeIndex + 1f) / (layer.Count + 1f);
-                    positions[layer[nodeIndex].Id] = new Vector2(x, y);
-                }
-            }
-
-            foreach (var layer in mapData.Layers)
-            foreach (var node in layer)
-            foreach (var targetId in node.Connections)
-            {
-                if (!positions.TryGetValue(targetId, out var target)) continue;
-                var color = completed.Contains(node.Id) ? GamePalette.Cyan : GamePalette.Hex("334155");
-                uiView.CreateConnection(positions[node.Id], target, color);
-            }
-
-            foreach (var layer in mapData.Layers)
-            foreach (var node in layer)
-                CreateNodeButton(node, positions[node.Id]);
-
-            uiView.SetProgress($"{mapData.Layers.Count} 层路线 · 已通过 {completed.Count} 节点");
-        }
-
-        private void CreateNodeButton(MapNodeData node, Vector2 position)
-        {
-            var isAvailable = available.Contains(node.Id);
-            var isCompleted = completed.Contains(node.Id);
-            var color = isCompleted ? GamePalette.Green : TypeColor(node.Type);
-            if (!isAvailable && !isCompleted) color = Color.Lerp(color, GamePalette.Panel, 0.68f);
-            uiView.CreateNodeButton(node.Id, TypeSymbol(node.Type), TypeLabel(node.Type), color, isAvailable,
-                isCompleted, node.Type == MapNodeType.Boss, position, () => NodeSelected?.Invoke(node));
+            uiView.Initialize(mapData, available, completed, node => NodeSelected?.Invoke(node), OnPlaceholderContinue);
         }
 
         public void ShowPlaceholder(MapNodeData node)
@@ -131,7 +79,7 @@ namespace PinballRoguelite
             }
         }
 
-        private static string TypeSymbol(MapNodeType type)
+        public static string TypeSymbol(MapNodeType type)
         {
             switch (type)
             {
